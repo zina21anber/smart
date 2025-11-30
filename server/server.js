@@ -18,7 +18,6 @@ const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 // (ملفات الـ middleware... لم تتغير)
-
 const {
   requireScheduler,
   requireCommitteeRole,
@@ -49,7 +48,7 @@ const COLLAB_NAMESPACE = 'collaboration';
 const wss = new WebSocket.Server({ server });
 
 // 👇 run backend on 5000
-const PORT = processs.env.PORT || 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
@@ -59,8 +58,8 @@ app.use(
   cors({
     origin: [
       'http://localhost:3000',
-      'https://smart-uf30.onrender.com', 
-      'https://papaya-kiepon-41a035.netlify.app' 
+      'https://smart-uf30.onrender.com', // رابط السيرفر على Render
+      'https://papaya-kiepon-41a035.netlify.app' // رابط موقعك الجديد على Netlify
     ],
     credentials: true,
   })
@@ -94,11 +93,12 @@ wss.on('error', (err) => {
   console.error('[collaboration] websocket error:', err);
 });
 
-// PostgreSQL Connection Pool - (تم التعديل لاستخدام DATABASE_URL)
-const sslConfig = process.env.DB_SSL === 'true' ? { require: true, rejectUnauthorized: false } : undefined;
+// PostgreSQL Connection Pool - (تم التعديل لاستخدام DATABASE_URL و SSL)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL, // ✅ استخدام URI بالكامل
-  ssl: sslConfig,
+  ssl: {
+    rejectUnauthorized: false // ✅ إعداد حاسم للاتصال بـ Supabase من Render
+  },
   keepAlive: true,
   max: 10,
   idleTimeoutMillis: 30000,
@@ -113,8 +113,6 @@ pool.connect((err, client, release) => {
     release();
   }
 });
-
-// (دوال المصادقة والـ migrations... لم تتغير)
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -162,7 +160,6 @@ runMigrations().catch(() => { });
 // ============================================
 
 app.post('/api/auth/login', validateLogin, async (req, res) => {
-// ... (الكود لم يتغير)
   const client = await pool.connect();
   try {
     const { email, password } = req.validatedData;
@@ -221,7 +218,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
     await client.query('UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3', [resetToken, expireDate, email]);
 
-    // 👇 التعديل هنا: رابط الصفحة في Netlify
+    // 👇 رابط الصفحة في Netlify
     const resetLink = `https://papaya-kiepon-41a035.netlify.app/reset-password?token=${resetToken}`;
 
     const mailOptions = {
@@ -316,7 +313,7 @@ app.use((error, req, res, next) => {
 
 server.listen(PORT, () => {
   console.log(`dYs? SmartSchedule Server running on port ${PORT}`);
-  console.log(`dY"S Connected to PostgreSQL database: ${process.env.DB_NAME}`);
+  console.log(`dY"S Connected to PostgreSQL database: ${process.env.DATABASE_URL}`);
   console.log(`[collaboration] WebSocket namespace ready at ws://localhost:${PORT}/${COLLAB_NAMESPACE}/:roomId`);
 });
 
