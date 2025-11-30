@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>إدارة قواعد الجدولة - لجنة التحميل</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0; padding: 0; min-height: 100vh;
+    color: #333;
+    padding: 2rem;
+  }
+  .container {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    max-width: 800px;
+    margin: auto;
+  }
+  h1 {
+    text-align: center;
+  }
+  label {
+    font-weight: 600;
+    margin-top: 1rem;
+    display: block;
+    text-align: right;
+  }
+  input[type="password"], textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: border-color 0.3s ease;
+  }
+  input[type="password"]:focus, textarea:focus {
+    border-color: #667eea;
+    outline: none;
+  }
+  button {
+    background-color: #667eea;
+    color: white;
+    border: none;
+    padding: 0.85rem 1rem;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 1rem;
+  }
+  button:hover {
+    background-color: #5a67d8;
+  }
+  .message {
+    font-weight: 600;
+    text-align: center;
+    margin-top: 1rem;
+  }
+  .message.error {
+    color: red;
+  }
+  .message.success {
+    color: green;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.75rem 1rem;
+    text-align: right;
+  }
+  th {
+    background-color: #667eea;
+    color: white;
+  }
+  textarea.rule-text {
+    width: 100%;
+    height: 80px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 0.5rem;
+  }
+  button.edit-btn, button.delete-btn {
+    padding: 0.4rem 0.75rem;
+    margin-left: 0.5rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  button.edit-btn {
+    background-color: #4caf50;
+    color: white;
+  }
+  button.delete-btn {
+    background-color: #f44336;
+    color: white;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>إدارة قواعد الجدولة - لجنة التحميل</h1>
+
+  <form id="rulesForm">
+    <label for="accessPass">كلمة مرور اللجنة</label>
+    <input type="password" id="accessPass" placeholder="أدخل كلمة المرور" required />
+    
+    <label for="ruleDescription">وصف القاعدة لإضافتها</label>
+    <textarea id="ruleDescription" placeholder="أدخل وصف القاعدة..." required></textarea>
+    
+    <button type="submit">إضافة القاعدة</button>
+  </form>
+
+  <p class="message" id="message"></p>
+
+  <table id="rulesTable">
+    <thead>
+      <tr>
+        <th>رقم القاعدة</th>
+        <th>وصف القاعدة</th>
+        <th>الإجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- القواعد ستظهر هنا -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const API_BASE_URL = "http://localhost:3000/api";
+  const COMMITTEE_PASSWORD = "loadcommittee2025";
+
+  const form = document.getElementById("rulesForm");
+  const messageEl = document.getElementById("message");
+  const tableBody = document.querySelector("#rulesTable tbody");
+
+  let rules = [];
+
+  // جلب القواعد من قاعدة البيانات وعرضها
+  async function fetchRules() {
+    try {
+      const response = await fetch(BASE_URL + "?user_field_names=true", {
+        headers: {
+          "Authorization": `Token ${TOKEN}`
+        }
+      });
+      if (!response.ok) throw new Error("فشل جلب القواعد");
+      const data = await response.json();
+      rules = data.results;
+      renderRules();
+    } catch (error) {
+      messageEl.textContent = "خطأ في تحميل القواعد: " + error.message;
+      messageEl.className = "message error";
+    }
+  }
+
+  // عرض القواعد في الجدول
+  function renderRules() {
+    tableBody.innerHTML = "";
+    rules.forEach(rule => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${rule.id}</td>
+        <td><textarea class="rule-text" data-id="${rule.id}">${rule.description}</textarea></td>
+        <td>
+          <button class="edit-btn" data-id="${rule.id}">تعديل</button>
+          <button class="delete-btn" data-id="${rule.id}">حذف</button>
+        </td>
+      `;
+      tableBody.appendChild(tr);
+    });
+    attachButtonsEvents();
+  }
+
+  // ربط أزرار تعديل وحذف
+  function attachButtonsEvents() {
+    document.querySelectorAll(".edit-btn").forEach(btn => {
+      btn.onclick = handleEdit;
+    });
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.onclick = handleDelete;
+    });
+  }
+
+  // تعديل القاعدة
+  async function handleEdit(e) {
+    const id = this.dataset.id;
+    const textarea = tableBody.querySelector(`textarea[data-id="${id}"]`);
+    if (!textarea.value.trim()) {
+      alert("الوصف لا يمكن أن يكون فارغًا");
+      return;
+    }
+    try {
+      const response = await fetch(`${BASE_URL}row/${id}/`, {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Token ${TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ description: textarea.value.trim() })
+      });
+      if (!response.ok) throw new Error("فشل تحديث القاعدة");
+      alert("تم تحديث القاعدة بنجاح");
+      fetchRules();
+    } catch (error) {
+      alert("خطأ أثناء تحديث القاعدة: " + error.message);
+    }
+  }
+
+  // حذف القاعدة
+  async function handleDelete(e) {
+    if (!confirm("هل أنت متأكد من حذف هذه القاعدة؟")) return;
+    const id = this.dataset.id;
+    try {
+      const response = await fetch(`${BASE_URL}row/${id}/`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Token ${TOKEN}`
+        }
+      });
+      if (!response.ok) throw new Error("فشل حذف القاعدة");
+      alert("تم حذف القاعدة بنجاح");
+      fetchRules();
+    } catch (error) {
+      alert("خطأ أثناء حذف القاعدة: " + error.message);
+    }
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    messageEl.textContent = "";
+    messageEl.className = "";
+
+    const accessPass = document.getElementById("accessPass").value;
+    if (accessPass !== COMMITTEE_PASSWORD) {
+      messageEl.textContent = "كلمة المرور غير صحيحة، غير مسموح بالدخول.";
+      messageEl.className = "message error";
+      return;
+    }
+
+    const desc = document.getElementById("ruleDescription").value.trim();
+    if (!desc) {
+      messageEl.textContent = "وصف القاعدة مطلوب.";
+      messageEl.className = "message error";
+      return;
+    }
+
+    try {
+      const response = await fetch(BASE_URL, {
+        method: "POST",
+        headers: {
+          "Authorization": `Token ${TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ description: desc })
+      });
+      if (!response.ok) throw new Error("فشل إضافة القاعدة");
+      messageEl.textContent = "تمت إضافة القاعدة بنجاح!";
+      messageEl.className = "message success";
+      form.reset();
+      fetchRules();
+    } catch (error) {
+      messageEl.textContent = "حدث خطأ في الإضافة: " + error.message;
+      messageEl.className = "message error";
+    }
+  });
+
+  // تحميل القواعد عند فتح الصفحة
+  fetchRules();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إنشاء الجداول - لجنة التحميل</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 95%;
+            max-width: 1400px;
+            margin: 2rem auto;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-section h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .committee-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: left;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-section h2 {
+            color: #333;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* أنماط قسم فلترة المستويات */
+        .level-filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-filter-section h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .level-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .level-btn {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .level-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .level-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .filter-info {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* منطقة عرض الجداول */
+        .tables-display-area {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            min-height: 400px;
+        }
+
+        .tables-display-area h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .level-info {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .tables-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .schedule-table {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 2px solid #e9ecef;
+        }
+
+        .schedule-table h4 {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .table-placeholder {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 3rem;
+            background: #f1f3f4;
+            border-radius: 8px;
+            border: 2px dashed #ccc;
+        }
+
+        .table-placeholder::before {
+            content: "📅";
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1024px) {
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                flex-direction: column;
+                padding: 1rem;
+                gap: 0.5rem;
+                z-index: 1000;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .navbar {
+                flex-wrap: wrap;
+            }
+
+            .user-section {
+                order: -1;
+                width: 100%;
+                justify-content: flex-end;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .logo-section h1 {
+                font-size: 1.2rem;
+            }
+
+            .committee-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.6rem;
+            }
+
+            .level-buttons {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.8rem;
+            }
+
+            .level-btn {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .tables-container {
+                gap: 1.5rem;
+            }
+
+            .schedule-table {
+                padding: 1rem;
+            }
+
+            .welcome-section h2 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo-section">
+                <h1>لجنة التحميل - جامعة الملك سعود</h1>
+                <span class="committee-badge">نظام الجداول</span>
+            </div>
+
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="#" class="nav-item active">
+                    🏠 الرئيسية
+                </a>
+                <a href="manageLoad.html" class="nav-item">
+                    📅 إدارة الجداول
+                </a>
+                <a href="manageStu.html" class="nav-item">
+                    👥 إدارة الطلاب
+                </a>
+                <a href="addElective.html" class="nav-item">
+                    📚 معلومات المقررات
+                </a>
+                <a href="rule.html" class="nav-item">
+                    ⚖️ إدارة القواعد
+                </a>
+                <a href="loadNotification.html" class="nav-item">
+                    🔔 الإشعارات
+                </a>
+            </div>
+
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name">د. أحمد الراشد</div>
+                    <div class="user-role">رئيس لجنة التحميل</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="welcome-section">
+                <h2>نظام إنشاء الجداول الذكية</h2>
+                <p>إدارة وإنشاء الجداول الدراسية لطلاب جامعة الملك سعود باستخدام الذكاء الاصطناعي</p>
+            </div>
+
+            <!-- قسم فلترة المستويات من 3 إلى 8 -->
+            <div class="level-filter-section">
+                <h3>🎓 فلترة المستويات</h3>
+                <div class="level-buttons">
+                    <button class="level-btn active" onclick="filterByLevel('all')">جميع المستويات</button>
+                    <button class="level-btn" onclick="filterByLevel(3)">المستوى 3</button>
+                    <button class="level-btn" onclick="filterByLevel(4)">المستوى 4</button>
+                    <button class="level-btn" onclick="filterByLevel(5)">المستوى 5</button>
+                    <button class="level-btn" onclick="filterByLevel(6)">المستوى 6</button>
+                    <button class="level-btn" onclick="filterByLevel(7)">المستوى 7</button>
+                    <button class="level-btn" onclick="filterByLevel(8)">المستوى 8</button>
+                </div>
+                <div class="filter-info">
+                    <span>📊</span>
+                    <span>المستويات المتاحة: 3-8 | اختر مستوى لعرض الجداول المقترحة</span>
+                </div>
+            </div>
+
+            <!-- منطقة عرض الجداول -->
+            <div class="tables-display-area">
+                <h3>📋 الجداول المقترحة</h3>
+                <div class="level-info">
+                    <span>📊</span>
+                    <span id="current-level-info">جميع المستويات</span>
+                </div>
+                <div class="tables-container" id="tables-container">
+                    <!-- سيتم إدراج الجداول هنا بواسطة JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentLevel = 'all';
+
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('nav-menu');
+            navMenu.classList.toggle('active');
+        }
+
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                // Clear any stored session data
+                localStorage.clear();
+                // Redirect to login page
+                window.location.href = 'committee-login.html';
+            }
+        }
+
+        // وظيفة فلترة المستويات وعرض الجداول المناسبة
+        function filterByLevel(level) {
+            currentLevel = level;
+
+            // إزالة الكلاس active من جميع الأزرار
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // إضافة الكلاس active للزر المختار
+            event.target.classList.add('active');
+
+            // تحديث معلومات المستوى الحالي
+            updateLevelInfo(level);
+
+            // عرض الجداول المناسبة للمستوى المختار
+            displayTablesForLevel(level);
+        }
+
+        function updateLevelInfo(level) {
+            const levelInfo = document.getElementById('current-level-info');
+            const levelNames = {
+                'all': 'جميع المستويات',
+                3: 'المستوى 3',
+                4: 'المستوى 4',
+                5: 'المستوى 5',
+                6: 'المستوى 6',
+                7: 'المستوى 7',
+                8: 'المستوى 8'
+            };
+
+            levelInfo.textContent = levelNames[level] || 'مستوى غير محدد';
+        }
+
+        function displayTablesForLevel(level) {
+            const container = document.getElementById('tables-container');
+
+            // مسح المحتوى الحالي
+            container.innerHTML = '';
+
+            if (level === 'all') {
+                // عرض جميع المستويات
+                for (let i = 3; i <= 8; i++) {
+                    createTablesForLevel(i, container);
+                }
+            } else {
+                // عرض المستوى المختار فقط
+                createTablesForLevel(level, container);
+            }
+        }
+
+        function createTablesForLevel(level, container) {
+            const levelDiv = document.createElement('div');
+            levelDiv.className = 'level-section';
+            levelDiv.innerHTML = `
+                <h4>المستوى ${level}</h4>
+                <div class="tables-row">
+                    ${generateTableHTML(level)}
+                </div>
+            `;
+
+            container.appendChild(levelDiv);
+        }
+
+        function generateTableHTML(level) {
+            // تحديد عدد الجداول حسب المستوى
+            let tablesHTML = '';
+            const tableCount = (level === 3 || level === 5 || level === 7) ? 2 : 1;
+
+            for (let i = 1; i <= tableCount; i++) {
+                tablesHTML += `
+                    <div class="schedule-table">
+                        <h4>جدول ${i} - المستوى ${level}</h4>
+                        <div class="table-placeholder">
+                            سيتم إنشاء هذا الجدول بواسطة الذكاء الاصطناعي قريباً
+                            <br>
+                            <small>يحتوي على التوزيع الأمثل للمقررات والأوقات</small>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return tablesHTML;
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // عرض الجداول للمستوى الافتراضي (جميع المستويات)
+            displayTablesForLevel('all');
+        });
+    </script>
+</body>
+</html>

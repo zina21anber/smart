@@ -1,0 +1,122 @@
+/* App.css: Custom styles to match the original design */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* Custom gradient from original CSS */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  /* Keep RTL direction (although the text is English now) */
+  direction: ltr;
+  /* Changed to LTR since text is English now */
+}
+
+.container-custom {
+  /* Apply custom background, border-radius, and box-shadow */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin: 2rem auto;
+  animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Navbar Customization */
+.navbar-custom {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+  color: white;
+}
+
+.nav-link-custom {
+  background: rgba(255, 255, 255, 0.1);
+  color: white !important;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.nav-link-custom:hover,
+.nav-link-custom.active {
+  background: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.nav-link-custom.active {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Stat Card Customization */
+.stat-card-custom {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 5px solid #667eea;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.stat-card-custom:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
+}
+
+.stat-icon-custom {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.stat-number-custom {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+/* Elective Voting Customization */
+.voting-stat-card-custom {
+  background: linear-gradient(135deg, #e8f4fd 0%, #f0f8ff 100%);
+  border: 2px solid #667eea;
+}
+
+.voting-stat-number-custom {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #667eea;
+}
+
+.progress-fill-custom {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.vote-btn-custom {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+
+.vote-btn-custom:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+/* Notification Customization */
+.notification-item-custom {
+  border-right: 4px solid #667eea;
+  transition: all 0.3s ease;
+}
+
+.notification-item-custom:hover {
+  background: #e8f4fd !important;
+}

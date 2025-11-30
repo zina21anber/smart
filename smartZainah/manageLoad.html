@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>إدارة الجداول - لجنة التحميل</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #2b2b32;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.75rem;
+    text-align: center;
+  }
+  th {
+    background-color: #667eea;
+    color: white;
+  }
+  tr:hover {
+    background-color: #f0f0f5;
+  }
+  .btn-save {
+    background-color: #667eea;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 1.5rem;
+  }
+  .btn-save:hover {
+    background-color: #5a67d8;
+  }
+  .editable {
+    background-color: #fffbea;
+    cursor: text;
+  }
+  .message {
+    text-align: center;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>إدارة جداول الطلاب - لجنة التحميل</h1>
+    <p class="message" id="message"></p>
+    <table id="scheduleTable">
+      <thead>
+        <tr>
+          <th>المعرف</th>
+          <th>اسم الطالب</th>
+          <th>الفصل</th>
+          <th>اليوم</th>
+          <th>الوقت</th>
+          <th>المادة</th>
+          <th>تعديل</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- بيانات الجداول ستظهر هنا -->
+      </tbody>
+    </table>
+    <button class="btn-save" id="saveBtn">حفظ التعديلات</button>
+  </div>
+
+  <script>
+    // استبدل {table_id} بمعرف جدول Baserow الخاص بالجداول
+    const API_BASE_URL = "http://localhost:3000/api";
+    const COMMITTEE_PASSWORD = "loadcommittee2025";
+
+    let schedules = [];
+
+    async function fetchSchedules() {
+      try {
+        const response = await fetch(BASE_URL, {
+          headers: {
+            "Authorization": `Token ${TOKEN}`,
+            "Content-Type": "application/json"
+          }
+        });
+        if (!response.ok) throw new Error(`خطأ في جلب البيانات: ${response.status}`);
+        const data = await response.json();
+        schedules = data.results;
+        renderTable();
+      } catch (error) {
+        document.getElementById("message").textContent = "تعذر تحميل الجداول: " + error.message;
+      }
+    }
+
+    function renderTable() {
+      const tbody = document.querySelector("#scheduleTable tbody");
+      tbody.innerHTML = "";
+
+      schedules.forEach(item => {
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${item.id}</td>
+          <td class="editable" contenteditable="true" data-field="student_name">${item.student_name || ''}</td>
+          <td class="editable" contenteditable="true" data-field="class">${item.class || ''}</td>
+          <td class="editable" contenteditable="true" data-field="day">${item.day || ''}</td>
+          <td class="editable" contenteditable="true" data-field="time">${item.time || ''}</td>
+          <td class="editable" contenteditable="true" data-field="subject">${item.subject || ''}</td>
+          <td><input type="checkbox" data-id="${item.id}" /></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function saveChanges() {
+      const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
+      if (checkedBoxes.length === 0) {
+        alert("يرجى اختيار سجل واحد على الأقل لحفظ التعديلات.");
+        return;
+      }
+
+      document.getElementById("message").textContent = "جاري حفظ التعديلات...";
+      
+      try {
+        for (const checkbox of checkedBoxes) {
+          const row = checkbox.closest("tr");
+          const id = checkbox.dataset.id;
+          let updatedData = {};
+
+          row.querySelectorAll(".editable").forEach(cell => {
+            const field = cell.dataset.field;
+            updatedData[field] = cell.textContent.trim();
+          });
+
+          // ارسال تعديل كل سجل منفرد PATCH
+          await fetch(`https://api.baserow.io/api/database/rows/table/{table_id}/row/${id}/`, {
+            method: "PATCH",
+            headers: {
+              "Authorization": `Token ${TOKEN}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedData)
+          });
+        }
+        document.getElementById("message").textContent = "تم حفظ التعديلات بنجاح.";
+        fetchSchedules(); // تحديث الجدول بعد الحفظ
+      } catch (error) {
+        document.getElementById("message").textContent = "حدث خطأ أثناء الحفظ: " + error.message;
+      }
+    }
+
+    document.getElementById("saveBtn").addEventListener("click", saveChanges);
+
+    document.addEventListener("DOMContentLoaded", fetchSchedules);
+
+  </script>
+</body>
+</html>

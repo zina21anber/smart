@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الطلاب بالمستويات - لجنة التحميل</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        /* قسم إدخال بيانات الطالب */
+        .student-input-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input, .form-group select {
+            padding: 0.8rem;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .add-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* قسم الطلاب المضافين */
+        .students-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .students-section h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2.5rem;
+            margin: 2rem 0;
+        }
+
+        .student-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 2.5rem;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            min-height: 350px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .student-card:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .student-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .student-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .student-id {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .student-name {
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .student-details {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .level-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .level-selector {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .level-selector h4 {
+            color: #333;
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .level-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .level-btn {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .level-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .level-btn.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .courses-section {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 8px;
+            border-right: 4px solid #667eea;
+        }
+
+        .courses-section h4 {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .course-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .course-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .course-code {
+            background: #667eea;
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .course-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .course-checkbox {
+            margin-top: 0.8rem;
+        }
+
+        .course-checkbox input[type="checkbox"] {
+            margin-left: 0.5rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #a6d5fa;
+        }
+
+        /* سؤال حول التقنيات المستخدمة */
+        .tech-question {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .tech-question h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .tech-question p {
+            margin-bottom: 1.5rem;
+            opacity: 0.9;
+        }
+
+        .tech-options {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tech-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tech-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .tech-option.selected {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .students-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .student-card {
+                padding: 1.5rem;
+                min-height: 280px;
+            }
+
+            .level-selection {
+                grid-template-columns: 1fr;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .tech-options {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="index-final.html" class="back-button">← العودة للرئيسية</a>
+            <h1>إدارة الطلاب بالمستويات</h1>
+            <p>أدخل بيانات الطالب وحدد المستوى الحالي والسابق والقادم</p>
+        </div>
+
+        <div class="main-content">
+            <!-- قسم إدخال بيانات الطالب الجديد -->
+            <div class="student-input-section">
+                <h3>👤 إضافة طالب جديد</h3>
+                <form class="input-form" id="studentForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="studentId">الرقم الجامعي</label>
+                            <input type="text" id="studentId" placeholder="441000123" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="studentName">اسم الطالب</label>
+                            <input type="text" id="studentName" placeholder="أدخل اسم الطالب الكامل" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="currentLevel">المستوى الحالي</label>
+                            <select id="currentLevel" required>
+                                <option value="" disabled selected>اختر المستوى الحالي</option>
+                                <option value="3">المستوى 3</option>
+                                <option value="4">المستوى 4</option>
+                                <option value="5">المستوى 5</option>
+                                <option value="6">المستوى 6</option>
+                                <option value="7">المستوى 7</option>
+                                <option value="8">المستوى 8</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="previousLevel">المستوى السابق (المتبقي)</label>
+                            <select id="previousLevel" required>
+                                <option value="" disabled selected>اختر المستوى السابق</option>
+                                <option value="3">المستوى 3</option>
+                                <option value="4">المستوى 4</option>
+                                <option value="5">المستوى 5</option>
+                                <option value="6">المستوى 6</option>
+                                <option value="7">المستوى 7</option>
+                                <option value="8">المستوى 8</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nextLevel">المستوى القادم (المطلوب)</label>
+                            <select id="nextLevel" required>
+                                <option value="" disabled selected>اختر المستوى القادم</option>
+                                <option value="4">المستوى 4</option>
+                                <option value="5">المستوى 5</option>
+                                <option value="6">المستوى 6</option>
+                                <option value="7">المستوى 7</option>
+                                <option value="8">المستوى 8</option>
+                                <option value="9">المستوى 9 (تخرج)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="add-btn">إضافة الطالب وتحديد المستويات</button>
+                </form>
+                <div id="inputMessage"></div>
+            </div>
+
+            <!-- قسم عرض الطلاب المضافين -->
+            <div class="students-section" id="studentsSection" style="display: none;">
+                <h3>📋 الطلاب المضافين</h3>
+                <div class="students-grid" id="studentsGrid">
+                    <!-- سيتم إضافة كروت الطلاب هنا -->
+                </div>
+            </div>
+
+            <!-- سؤال حول التقنيات المستخدمة -->
+           
+            </div>
+        </div>
+    </div>
+
+    <!-- قالب كرت الطالب -->
+    <div id="studentTemplate" style="display: none;">
+        <div class="student-card" data-student-id="">
+            <div class="student-header">
+                <div class="student-info">
+                    <div class="student-id">الرقم الجامعي: <span class="student-id-value"></span></div>
+                    <div class="student-name">الاسم: <span class="student-name-value"></span></div>
+                </div>
+            </div>
+
+            <div class="student-details">
+                <div class="detail-item">
+                    <span class="detail-label">المستوى الحالي:</span>
+                    <span class="detail-value current-level-value"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">المستوى السابق:</span>
+                    <span class="detail-value previous-level-value"></span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">المستوى القادم:</span>
+                    <span class="detail-value next-level-value"></span>
+                </div>
+            </div>
+
+            <!-- اختيار المستويات -->
+            <div class="level-selection">
+                <div class="level-selector">
+                    <h4>المستوى السابق (المتبقي)</h4>
+                    <div class="level-buttons previous-levels">
+                        <button class="level-btn" data-level="3">المستوى 3</button>
+                        <button class="level-btn" data-level="4">المستوى 4</button>
+                        <button class="level-btn" data-level="5">المستوى 5</button>
+                        <button class="level-btn" data-level="6">المستوى 6</button>
+                        <button class="level-btn" data-level="7">المستوى 7</button>
+                    </div>
+                </div>
+
+                <div class="level-selector">
+                    <h4>المستوى القادم (المطلوب)</h4>
+                    <div class="level-buttons next-levels">
+                        <button class="level-btn" data-level="4">المستوى 4</button>
+                        <button class="level-btn" data-level="5">المستوى 5</button>
+                        <button class="level-btn" data-level="6">المستوى 6</button>
+                        <button class="level-btn" data-level="7">المستوى 7</button>
+                        <button class="level-btn" data-level="8">المستوى 8</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- عرض المواد -->
+            <div class="courses-container" id="coursesContainer" style="display: none;">
+                <div class="courses-section previous-courses">
+                    <h4>📚 المواد المتبقية من المستوى السابق</h4>
+                    <div class="courses-grid previous-courses-grid"></div>
+                </div>
+
+                <div class="courses-section next-courses">
+                    <h4>📖 المواد المطلوبة للمستوى القادم</h4>
+                    <div class="courses-grid next-courses-grid"></div>
+                </div>
+            </div>
+
+            <!-- أزرار التحكم -->
+            <div class="action-buttons">
+                <button class="btn btn-success save-student">حفظ التغييرات</button>
+                <button class="btn btn-secondary reset-student">إعادة تعيين</button>
+                <button class="btn btn-danger delete-student">حذف الطالب</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // بيانات المواد حسب المستوى
+        const coursesData = {
+            3: [
+                { code: "CSI 301", name: "برمجة الويب", credit: 3 },
+                { code: "CSI 302", name: "قواعد البيانات", credit: 3 },
+                { code: "CSI 303", name: "نظم التشغيل", credit: 3 },
+                { code: "CSI 304", name: "هياكل البيانات والخوارزميات", credit: 3 }
+            ],
+            4: [
+                { code: "CSI 401", name: "الذكاء الاصطناعي", credit: 3 },
+                { code: "CSI 402", name: "تعلم الآلة", credit: 3 },
+                { code: "CSI 403", name: "معالجة الصور", credit: 3 },
+                { code: "CSI 404", name: "الأمن السيبراني", credit: 3 }
+            ],
+            5: [
+                { code: "CSI 501", name: "تطوير التطبيقات المتنقلة", credit: 3 },
+                { code: "CSI 502", name: "الحوسبة السحابية", credit: 3 },
+                { code: "CSI 503", name: "إنترنت الأشياء", credit: 3 },
+                { code: "CSI 504", name: "البيانات الضخمة", credit: 3 }
+            ],
+            6: [
+                { code: "CSI 601", name: "تطوير الألعاب", credit: 3 },
+                { code: "CSI 602", name: "الواقع المعزز", credit: 3 },
+                { code: "CSI 603", name: "الروبوتات", credit: 3 },
+                { code: "CSI 604", name: "الحوسبة الكمومية", credit: 3 }
+            ],
+            7: [
+                { code: "CSI 701", name: "الذكاء الاصطناعي المتقدم", credit: 3 },
+                { code: "CSI 702", name: "تعلم الآلة العميق", credit: 3 },
+                { code: "CSI 703", name: "رؤية الحاسوب", credit: 3 },
+                { code: "CSI 704", name: "معالجة اللغات الطبيعية", credit: 3 }
+            ],
+            8: [
+                { code: "CSI 801", name: "مشروع التخرج", credit: 6 },
+                { code: "CSI 802", name: "تدريب عملي", credit: 3 }
+            ]
+        };
+
+        // قاعدة بيانات الطلاب (تبدأ فارغة)
+        let studentsDatabase = {};
+
+        // إضافة طالب جديد
+        document.getElementById('studentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const studentId = document.getElementById('studentId').value.trim();
+            const studentName = document.getElementById('studentName').value.trim();
+            const currentLevel = parseInt(document.getElementById('currentLevel').value);
+            const previousLevel = parseInt(document.getElementById('previousLevel').value);
+            const nextLevel = parseInt(document.getElementById('nextLevel').value);
+
+            const messageEl = document.getElementById('inputMessage');
+
+            // التحقق من صحة البيانات
+            if (!studentId || !studentName || !currentLevel || !previousLevel || !nextLevel) {
+                showMessage('يرجى تعبئة جميع الحقول', 'error');
+                return;
+            }
+
+            // التحقق من عدم وجود الطالب مسبقاً
+            if (studentsDatabase[studentId]) {
+                showMessage('هذا الطالب موجود مسبقاً في القائمة', 'error');
+                return;
+            }
+
+            // إنشاء بيانات الطالب الجديد
+            const newStudent = {
+                id: studentId,
+                name: studentName,
+                currentLevel: currentLevel,
+                previousLevel: previousLevel,
+                nextLevel: nextLevel,
+                remainingCourses: [],
+                requiredCourses: []
+            };
+
+            // إضافة الطالب إلى قاعدة البيانات
+            studentsDatabase[studentId] = newStudent;
+
+            // إضافة كرت الطالب للواجهة
+            addStudentCard(newStudent);
+
+            // إظهار قسم الطلاب
+            document.getElementById('studentsSection').style.display = 'block';
+
+            // إعادة تعيين النموذج
+            document.getElementById('studentForm').reset();
+
+            showMessage(`تم إضافة الطالب ${studentName} بنجاح!`, 'success');
+
+            // تمرير إلى كرت الطالب الجديد
+            setTimeout(() => {
+                const newCard = document.querySelector(`[data-student-id="${studentId}"]`);
+                if (newCard) {
+                    newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 500);
+        });
+
+        function addStudentCard(student) {
+            const template = document.getElementById('studentTemplate');
+            const card = template.firstElementChild.cloneNode(true);
+            const grid = document.getElementById('studentsGrid');
+
+            // تعبئة بيانات الطالب
+            card.querySelector('.student-id-value').textContent = student.id;
+            card.querySelector('.student-name-value').textContent = student.name;
+            card.querySelector('.current-level-value').textContent = `المستوى ${student.currentLevel}`;
+            card.querySelector('.previous-level-value').textContent = `المستوى ${student.previousLevel}`;
+            card.querySelector('.next-level-value').textContent = `المستوى ${student.nextLevel}`;
+            card.setAttribute('data-student-id', student.id);
+
+            // تعيين المستويات المختارة
+            const prevButtons = card.querySelectorAll('.previous-levels .level-btn');
+            const nextButtons = card.querySelectorAll('.next-levels .level-btn');
+
+            prevButtons.forEach(btn => {
+                btn.classList.toggle('selected', parseInt(btn.dataset.level) === student.previousLevel);
+                btn.addEventListener('click', () => selectLevel(btn, 'previous', student.id));
+            });
+
+            nextButtons.forEach(btn => {
+                btn.classList.toggle('selected', parseInt(btn.dataset.level) === student.nextLevel);
+                btn.addEventListener('click', () => selectLevel(btn, 'next', student.id));
+            });
+
+            // إعداد أزرار التحكم
+            setupCardButtons(card, student);
+
+            // إضافة الكرت للشبكة
+            grid.appendChild(card);
+        }
+
+        function selectLevel(button, type, studentId) {
+            const card = document.querySelector(`[data-student-id="${studentId}"]`);
+            const buttons = card.querySelectorAll(`.${type}-levels .level-btn`);
+
+            // إزالة التحديد من جميع الأزرار
+            buttons.forEach(btn => btn.classList.remove('selected'));
+
+            // إضافة التحديد للزر المختار
+            button.classList.add('selected');
+
+            // تحديث بيانات الطالب
+            const level = parseInt(button.dataset.level);
+            if (type === 'previous') {
+                studentsDatabase[studentId].previousLevel = level;
+                card.querySelector('.previous-level-value').textContent = `المستوى ${level}`;
+            } else {
+                studentsDatabase[studentId].nextLevel = level;
+                card.querySelector('.next-level-value').textContent = `المستوى ${level}`;
+            }
+
+            // عرض المواد المناسبة
+            displayCourses(card, studentId, type);
+
+            showMessage(`تم تحديد ${type === 'previous' ? 'المستوى السابق' : 'المستوى القادم'}`, 'info');
+        }
+
+        function displayCourses(card, studentId, type = 'both') {
+            const coursesContainer = card.querySelector('#coursesContainer');
+
+            const student = studentsDatabase[studentId];
+            if (!student) return;
+
+            // الحصول على المستويات المختارة
+            const selectedPrevLevel = student.previousLevel;
+            const selectedNextLevel = student.nextLevel;
+
+            // عرض المواد المتبقية
+            if (type === 'previous' || type === 'both') {
+                const prevGrid = card.querySelector('.previous-courses-grid');
+                prevGrid.innerHTML = '';
+
+                if (coursesData[selectedPrevLevel]) {
+                    coursesData[selectedPrevLevel].forEach(course => {
+                        const isSelected = student.remainingCourses.includes(course.code);
+                        const courseCard = createCourseCard(course, 'remaining', isSelected, studentId);
+                        prevGrid.appendChild(courseCard);
+                    });
+                }
+            }
+
+            // عرض المواد المطلوبة
+            if (type === 'next' || type === 'both') {
+                const nextGrid = card.querySelector('.next-courses-grid');
+                nextGrid.innerHTML = '';
+
+                if (coursesData[selectedNextLevel]) {
+                    coursesData[selectedNextLevel].forEach(course => {
+                        const isSelected = student.requiredCourses.includes(course.code);
+                        const courseCard = createCourseCard(course, 'required', isSelected, studentId);
+                        nextGrid.appendChild(courseCard);
+                    });
+                }
+            }
+
+            // إظهار قسم المواد
+            coursesContainer.style.display = 'block';
+        }
+
+        function createCourseCard(course, type, isSelected, studentId) {
+            const card = document.createElement('div');
+            card.className = 'course-card';
+
+            card.innerHTML = `
+                <div class="course-header">
+                    <span class="course-name">${course.name}</span>
+                    <span class="course-code">${course.code}</span>
+                </div>
+                <div class="course-checkbox">
+                    <label>
+                        <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleCourseSelection('${studentId}', '${course.code}', '${type}', this.checked)">
+                        ${type === 'remaining' ? 'مادة متبقية' : 'مادة مطلوبة'}
+                    </label>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function toggleCourseSelection(studentId, courseCode, type, isChecked) {
+            const student = studentsDatabase[studentId];
+            if (!student) return;
+
+            // تحديث قائمة المواد
+            if (type === 'remaining') {
+                if (isChecked) {
+                    if (!student.remainingCourses.includes(courseCode)) {
+                        student.remainingCourses.push(courseCode);
+                    }
+                } else {
+                    student.remainingCourses = student.remainingCourses.filter(code => code !== courseCode);
+                }
+            } else if (type === 'required') {
+                if (isChecked) {
+                    if (!student.requiredCourses.includes(courseCode)) {
+                        student.requiredCourses.push(courseCode);
+                    }
+                } else {
+                    student.requiredCourses = student.requiredCourses.filter(code => code !== courseCode);
+                }
+            }
+        }
+
+        function setupCardButtons(card, student) {
+            const saveBtn = card.querySelector('.save-student');
+            const resetBtn = card.querySelector('.reset-student');
+            const deleteBtn = card.querySelector('.delete-student');
+
+            saveBtn.addEventListener('click', () => saveStudentChanges(student.id));
+            resetBtn.addEventListener('click', () => resetStudentCard(card, student));
+            deleteBtn.addEventListener('click', () => deleteStudent(student.id, card));
+        }
+
+        function saveStudentChanges(studentId) {
+            const student = studentsDatabase[studentId];
+            if (!student) return;
+
+            // هنا يمكن إضافة منطق حفظ البيانات إلى قاعدة البيانات
+            showMessage(`تم حفظ تغييرات الطالب ${student.name} بنجاح!`, 'success');
+
+            console.log('Saving student data:', student);
+        }
+
+        function resetStudentCard(card, student) {
+            // إعادة تعيين اختيار المستويات
+            const prevButtons = card.querySelectorAll('.previous-levels .level-btn');
+            const nextButtons = card.querySelectorAll('.next-levels .level-btn');
+
+            prevButtons.forEach(btn => {
+                btn.classList.toggle('selected', parseInt(btn.dataset.level) === student.previousLevel);
+            });
+
+            nextButtons.forEach(btn => {
+                btn.classList.toggle('selected', parseInt(btn.dataset.level) === student.nextLevel);
+            });
+
+            // إعادة تعيين اختيار المواد
+            const checkboxes = card.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                const courseCode = checkbox.closest('.course-card').querySelector('.course-code').textContent;
+                const isRemaining = checkbox.closest('.previous-courses');
+                const isRequired = checkbox.closest('.next-courses');
+
+                let shouldBeChecked = false;
+                if (isRemaining && student.remainingCourses.includes(courseCode)) {
+                    shouldBeChecked = true;
+                } else if (isRequired && student.requiredCourses.includes(courseCode)) {
+                    shouldBeChecked = true;
+                }
+
+                checkbox.checked = shouldBeChecked;
+            });
+
+            showMessage('تم إعادة تعيين اختيارات الطالب', 'info');
+        }
+
+        function deleteStudent(studentId, card) {
+            if (confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
+                // حذف من قاعدة البيانات
+                delete studentsDatabase[studentId];
+
+                // حذف الكرت من الواجهة
+                card.remove();
+
+                // إخفاء قسم الطلاب إذا لم يعد هناك طلاب
+                if (Object.keys(studentsDatabase).length === 0) {
+                    document.getElementById('studentsSection').style.display = 'none';
+                }
+
+                showMessage('تم حذف الطالب بنجاح', 'info');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('inputMessage');
+            messageEl.innerHTML = `<div class="message ${type}">${message}</div>`;
+
+            // إخفاء الرسالة بعد 3 ثواني
+            setTimeout(() => {
+                messageEl.innerHTML = '';
+            }, 3000);
+        }
+
+        // وظيفة الإجابة على السؤال التقني
+        function selectTechOption(option) {
+            // إزالة التحديد من جميع الخيارات
+            document.querySelectorAll('.tech-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // إضافة التحديد للخيار المختار
+            event.target.classList.add('selected');
+
+            // عرض الإجابة الصحيحة
+            const answerEl = document.getElementById('techAnswer');
+
+            if (option === 'neither') {
+                answerEl.innerHTML = '✅ صحيح! هذه الصفحة تستخدم HTML و CSS و JavaScript فقط بدون أي مكتبات خارجية مثل Bootstrap أو React.';
+                answerEl.style.color = '#28a745';
+            } else {
+                answerEl.innerHTML = '❌ خطأ! هذه الصفحة تستخدم HTML و CSS و JavaScript فقط بدون أي مكتبات خارجية.';
+                answerEl.style.color = '#dc3545';
+            }
+
+            answerEl.style.fontWeight = '600';
+        }
+
+        //* تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('صفحة إدارة الطلاب بالمستويات جاهزة للاستخدام');
+
+            // إضافة بعض الطلاب التجريبيين للاختبار
+            setTimeout(() => {
+                // إضافة طالب تجريبي
+                document.getElementById('studentId').value = '441000123';
+                document.getElementById('studentName').value = 'أحمد محمد علي';
+                document.getElementById('currentLevel').value = '4';
+                document.getElementById('previousLevel').value = '3';
+                document.getElementById('nextLevel').value = '5';
+
+                // محاكاة ضغط زر الإضافة
+                document.querySelector('.add-btn').click();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

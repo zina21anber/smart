@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSU - My Schedule</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 95%;
+            max-width: 1200px;
+            margin: 2rem auto;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .navbar h2 {
+            font-size: 1.5rem;
+        }
+
+        .navbar-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .version-selector {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .version-selector:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .content h3 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .content p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .version-info {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .schedule-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 120px repeat(5, 1fr);
+            gap: 1px;
+            background: #dee2e6;
+            border-radius: 12px;
+            overflow: hidden;
+            min-width: 800px;
+        }
+
+        .schedule-cell {
+            background: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+            transition: all 0.3s ease;
+        }
+
+        .schedule-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .schedule-time {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            font-weight: 700;
+            color: #495057;
+            font-size: 0.85rem;
+            writing-mode: horizontal-tb;
+        }
+
+        .schedule-course {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .schedule-course:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            z-index: 10;
+        }
+
+        .course-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .course-room {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .break-cell {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            color: #2d3436;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        .exam-cell {
+            background: linear-gradient(135deg, #ff7675 0%, #fd79a8 100%);
+            color: white;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .exam-cell::before {
+            content: '📝';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 1.2rem;
+        }
+
+        .empty-cell {
+            background: #f8f9fa;
+            opacity: 0.5;
+        }
+
+        .comment-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .comment-section h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .semester-info {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+
+        .semester-info h4 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.6);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .legend {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .legend h4 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .print-btn {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 184, 148, 0.4);
+        }
+
+        .saved-comment {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .comment-timestamp {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .navbar-controls {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+            }
+            
+            .version-selector {
+                width: 100%;
+            }
+            
+            .schedule-grid {
+                font-size: 0.8rem;
+                grid-template-columns: 80px repeat(5, 1fr);
+                min-width: 600px;
+            }
+            
+            .schedule-cell {
+                padding: 0.5rem;
+                min-height: 50px;
+            }
+            
+            .course-name {
+                font-size: 0.8rem;
+            }
+            
+            .course-room {
+                font-size: 0.7rem;
+            }
+            
+            .info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .legend-items {
+                grid-template-columns: 1fr;
+            }
+
+            .comment-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                background: white;
+            }
+            
+            .navbar {
+                background: #333 !important;
+                print-color-adjust: exact;
+            }
+            
+            .print-btn, .comment-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <h2>My Schedule</h2>
+            <div class="navbar-controls">
+                <select class="version-selector" id="version-selector" onchange="switchVersion()">
+                    <option value="version1">Version 1</option>
+                    <option value="version2">Version 2</option>
+                </select>
+                <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h3>Your Weekly Schedule</h3>
+            <p>Here is your assigned class schedule based on your preferences and course availability.</p>
+            
+            <div class="version-info" id="version-info">
+                Currently viewing: <strong>Version 1</strong> - Primary Schedule
+            </div>
+            
+            <div class="schedule-container">
+                <div class="schedule-grid" id="schedule-grid">
+                    <!-- Schedule will be dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Comment Section -->
+            <div class="comment-section">
+                <h4>💬 Schedule Comments & Feedback</h4>
+                <p style="color: #666; margin-bottom: 1rem;">Share your thoughts about this schedule version or request changes:</p>
+                
+                <textarea 
+                    class="comment-textarea" 
+                    id="comment-textarea" 
+                    placeholder="Enter your comments about the schedule here... (e.g., time conflicts, room preferences, course concerns)"
+                ></textarea>
+                
+                <div class="comment-actions">
+                    <button class="btn btn-secondary" onclick="clearComment()">Clear</button>
+                    <button class="btn btn-primary" onclick="saveComment()">Save Comment</button>
+                </div>
+                
+                <div id="saved-comments"></div>
+            </div>
+
+            <div class="semester-info">
+                <h4>Semester Information</h4>
+                <div class="info-grid" id="info-grid">
+                    <!-- Info will be dynamically populated -->
+                </div>
+                <p style="color: #666; text-align: center; margin-top: 1rem;">
+                    <strong>Note:</strong> This schedule is based on your course preferences and availability. 
+                    If you need any changes, please contact the Load Committee.
+                </p>
+                <button class="print-btn" onclick="window.print()">🖨️ Print Schedule</button>
+            </div>
+
+            <div class="legend">
+                <h4>Schedule Legend</h4>
+                <div class="legend-items">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></div>
+                        <span>Regular Course</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);"></div>
+                        <span>Lunch Break (12-1 PM)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #ff7675 0%, #fd79a8 100%);"></div>
+                        <span>Exam Period (Mon/Wed 12-2 PM)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f8f9fa;"></div>
+                        <span>Free Period</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Schedule data for both versions
+        const scheduleData = {
+            version1: {
+                name: "Version 1 - Primary Schedule",
+                info: {
+                    credits: 15,
+                    courses: 8,
+                    hours: 22,
+                    electives: 3
+                },
+                schedule: [
+                    // Time headers
+                    ['Time', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+                    // 08:00-09:30
+                    ['08:00-09:30', 
+                        {type: 'course', name: 'Data Structures', room: 'Room A101'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Mathematics', room: 'Room B205'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Physics', room: 'Room C301'}
+                    ],
+                    // 09:30-11:00
+                    ['09:30-11:00', 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Programming', room: 'Lab 1'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Database', room: 'Room A205'}, 
+                        {type: 'empty'}
+                    ],
+                    // 11:00-12:30
+                    ['11:00-12:30', 
+                        {type: 'course', name: 'AI Course', room: 'Room B101'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Web Development', room: 'Lab 2'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Software Engineering', room: 'Room A301'}
+                    ],
+                    // 12:00-13:00 (Lunch Break)
+                    ['12:00-13:00', 
+                        {type: 'break', name: 'Lunch Break'}, 
+                        {type: 'exam', name: 'Exam Period', room: 'Various Rooms'}, 
+                        {type: 'break', name: 'Lunch Break'}, 
+                        {type: 'exam', name: 'Exam Period', room: 'Various Rooms'}, 
+                        {type: 'break', name: 'Lunch Break'}
+                    ],
+                    // 13:00-14:00 (Mon/Wed continues Exam, others free)
+                    ['13:00-14:00', 
+                        {type: 'empty'}, 
+                        {type: 'exam', name: 'Exam Period', room: 'Various Rooms'}, 
+                        {type: 'empty'}, 
+                        {type: 'exam', name: 'Exam Period', room: 'Various Rooms'}, 
+                        {type: 'empty'}
+                    ],
+                    // 14:00-15:30
+                    ['14:00-15:30', 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Statistics', room: 'Room B301'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Networks', room: 'Room A105'}, 
+                        {type: 'empty'}
+                    ]
+                ]
+            },
+            version2: {
+                name: "Version 2 - Alternative Schedule",
+                info: {
+                    credits: 15,
+                    courses: 8,
+                    hours: 24,
+                    electives: 3
+                },
+                schedule: [
+                    // Time headers
+                    ['Time', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'],
+                    // 08:00-09:30
+                    ['08:00-09:30', 
+                        {type: 'course', name: 'Mathematics', room: 'Room B205'}, 
+                        {type: 'course', name: 'Programming', room: 'Lab 1'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'AI Course', room: 'Room B101'}, 
+                        {type: 'course', name: 'Physics', room: 'Room C301'}
+                    ],
+                    // 09:30-11:00
+                    ['09:30-11:00', 
+                        {type: 'course', name: 'Web Development', room: 'Lab 2'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Database', room: 'Room A205'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Data Structures', room: 'Room A101'}
+                    ],
+                    // 11:00-12:30
+                    ['11:00-12:30', 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Statistics', room: 'Room B301'}, 
+                        {type: 'course', name: 'Software Engineering', room: 'Room A301'}, 
+                        {type: 'course', name: 'Networks', room: 'Room A105'}, 
+                        {type: 'empty'}
+                    ],
+                    // 12:00-14:00 (Mon/Wed Exams, others break then free)
+                    ['12:00-14:00', 
+                        {type: 'break', name: 'Lunch Break'}, 
+                        {type: 'exam', name: 'Exam Period', room: 'Various Rooms'}, 
+                        {type: 'break', name: 'Lunch Break'}, 
+                        {type: 'exam', name: 'Exam Period', room: 'Various Rooms'}, 
+                        {type: 'break', name: 'Lunch Break'}
+                    ],
+                    // 14:00-15:30
+                    ['14:00-15:30', 
+                        {type: 'course', name: 'Machine Learning', room: 'Room C205'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Cybersecurity', room: 'Room B401'}, 
+                        {type: 'empty'}, 
+                        {type: 'course', name: 'Mobile Dev', room: 'Lab 3'}
+                    ]
+                ]
+            }
+        };
+
+        let currentVersion = 'version1';
+
+        function renderSchedule(version) {
+            const scheduleGrid = document.getElementById('schedule-grid');
+            const data = scheduleData[version];
+            
+            scheduleGrid.innerHTML = '';
+            
+            data.schedule.forEach((row, rowIndex) => {
+                row.forEach((cell, cellIndex) => {
+                    const cellDiv = document.createElement('div');
+                    
+                    if (rowIndex === 0) {
+                        // Header row
+                        cellDiv.className = 'schedule-cell schedule-header';
+                        cellDiv.textContent = cell;
+                    } else if (cellIndex === 0) {
+                        // Time column
+                        cellDiv.className = 'schedule-cell schedule-time';
+                        cellDiv.innerHTML = cell.replace('-', '<br>');
+                    } else {
+                        // Content cells
+                        const cellData = cell;
+                        cellDiv.className = 'schedule-cell';
+                        
+                        switch (cellData.type) {
+                            case 'course':
+                                cellDiv.classList.add('schedule-course');
+                                cellDiv.innerHTML = `
+                                    <div class="course-name">${cellData.name}</div>
+                                    <div class="course-room">${cellData.room}</div>
+                                `;
+                                break;
+                            case 'break':
+                                cellDiv.classList.add('break-cell');
+                                cellDiv.textContent = cellData.name;
+                                break;
+                            case 'exam':
+                                cellDiv.classList.add('exam-cell');
+                                cellDiv.innerHTML = `
+                                    <div class="course-name">${cellData.name}</div>
+                                    <div class="course-room">${cellData.room}</div>
+                                `;
+                                break;
+                            case 'empty':
+                                cellDiv.classList.add('empty-cell');
+                                break;
+                        }
+                    }
+                    
+                    scheduleGrid.appendChild(cellDiv);
+                });
+            });
+
+            // Update info grid
+            const infoGrid = document.getElementById('info-grid');
+            infoGrid.innerHTML = `
+                <div class="info-item">
+                    <div class="info-value">${data.info.credits}</div>
+                    <div class="info-label">Total Credits</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">${data.info.courses}</div>
+                    <div class="info-label">Total Courses</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">${data.info.hours}</div>
+                    <div class="info-label">Hours/Week</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-value">${data.info.electives}</div>
+                    <div class="info-label">Elective Courses</div>
+                </div>
+            `;
+
+            // Update version info
+            document.getElementById('version-info').innerHTML = `
+                Currently viewing: <strong>${data.name}</strong>
+            `;
+        }
+
+        function switchVersion() {
+            const selector = document.getElementById('version-selector');
+            currentVersion = selector.value;
+            renderSchedule(currentVersion);
+            loadComments();
+        }
+
+        function saveComment() {
+            const textarea = document.getElementById('comment-textarea');
+            const comment = textarea.value.trim();
+            
+            if (!comment) {
+                alert('Please enter a comment before saving.');
+                return;
+            }
+            
+            const timestamp = new Date().toLocaleString();
+            const commentKey = `schedule_comment_${currentVersion}`;
+            
+            // Save to localStorage
+            const commentData = {
+                text: comment,
+                timestamp: timestamp,
+                version: currentVersion
+            };
+            
+            localStorage.setItem(commentKey, JSON.stringify(commentData));
+            
+            // Clear textarea
+            textarea.value = '';
+            
+            // Show success message
+            displaySavedComment(commentData);
+            
+            // Show confirmation
+            alert('Comment saved successfully!');
+        }
+
+        function clearComment() {
+            if (confirm('Are you sure you want to clear the comment?')) {
+                document.getElementById('comment-textarea').value = '';
+            }
+        }
+
+        function displaySavedComment(commentData) {
+            const savedCommentsDiv = document.getElementById('saved-comments');
+            savedCommentsDiv.innerHTML = `
+                <div class="saved-comment">
+                    <strong>Saved Comment for ${scheduleData[commentData.version].name}:</strong>
+                    <p>${commentData.text}</p>
+                    <div class="comment-timestamp">Saved on: ${commentData.timestamp}</div>
+                </div>
+            `;
+        }
+
+        function loadComments() {
+            const commentKey = `schedule_comment_${currentVersion}`;
+            const savedComment = localStorage.getItem(commentKey);
+            
+            if (savedComment) {
+                const commentData = JSON.parse(savedComment);
+                displaySavedComment(commentData);
+            } else {
+                document.getElementById('saved-comments').innerHTML = '';
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderSchedule(currentVersion);
+            loadComments();
+            
+            // Add course click functionality
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.schedule-course')) {
+                    const courseCell = e.target.closest('.schedule-course');
+                    const courseName = courseCell.querySelector('.course-name')?.textContent;
+                    const courseRoom = courseCell.querySelector('.course-room')?.textContent;
+                    
+                    if (courseName && courseRoom) {
+                        alert(`Course: ${courseName}\n${courseRoom}\n\nClick OK to continue.`);
+                    }
+                } else if (e.target.closest('.exam-cell')) {
+                    const examCell = e.target.closest('.exam-cell');
+                    const examName = examCell.querySelector('.course-name')?.textContent;
+                    const examRoom = examCell.querySelector('.course-room')?.textContent;
+                    
+                    if (examName && examRoom) {
+                        alert(`${examName}\n${examRoom}\n\nExam periods are reserved for midterm and final examinations.`);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

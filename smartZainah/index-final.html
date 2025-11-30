@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMART SCHEDULE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            direction: rtl;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 95%;
+            max-width: 1400px;
+            margin: 2rem auto;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: relative;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-section h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .committee-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: left;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .main-content {
+            padding: 2rem;
+        }
+
+        .welcome-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .welcome-section h2 {
+            color: #333;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-section p {
+            color: #666;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #667eea;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-description {
+            color: #888;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        /* قسم التصويت على المواد الاختيارية */
+        .elective-voting-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .elective-voting-section h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .voting-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .voting-stat-card {
+            background: linear-gradient(135deg, #e8f4fd 0%, #f0f8ff 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #667eea;
+        }
+
+        .voting-stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .voting-stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .elective-courses {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .course-voting-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .course-voting-card:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .course-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .course-code {
+            background: #667eea;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .voting-progress {
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .vote-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .vote-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* قسم الإشعارات */
+        .notifications-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 3rem 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .notifications-section h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .notification-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-right: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            background: #e8f4fd;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .notification-content {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 1024px) {
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                flex-direction: column;
+                padding: 1rem;
+                gap: 0.5rem;
+                z-index: 1000;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: block;
+            }
+
+            .navbar {
+                flex-wrap: wrap;
+            }
+
+            .user-section {
+                order: -1;
+                width: 100%;
+                justify-content: flex-end;
+                margin-bottom: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .logo-section h1 {
+                font-size: 1.2rem;
+            }
+
+            .committee-badge {
+                font-size: 0.7rem;
+                padding: 0.2rem 0.6rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .welcome-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .voting-stats {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <div class="logo-section">
+                <h1>SMART SCHEDULE</h1>
+                <span class="committee-badge">لوحة الإدارة</span>
+            </div>
+
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+
+            <div class="nav-menu" id="nav-menu">
+                <a href="#" class="nav-item active">
+                    🏠 HOME
+                </a>
+                <a href="manageSchedules-final.html" class="nav-item">
+                    📅 إدارة الجداول والمستويات
+                </a>
+                <a href="manageStu-enhanced-display.html" class="nav-item">
+                    👥 إدارة الطلاب
+                </a>
+                <a href="addElective.html" class="nav-item">
+                    📚 معلومات المقررات
+                </a>
+                <a href="rule.html" class="nav-item">
+                    ⚖️ إدارة القواعد
+                </a>
+                <a href="loadNotification.html" class="nav-item">
+                    🔔 الإشعارات
+                </a>
+            </div>
+
+            <div class="user-section">
+                <div class="user-info">
+                    <div class="user-name">د. أحمد الراشد</div>
+                    <div class="user-role">رئيس لجنة التحميل</div>
+                </div>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </nav>
+
+        <main class="main-content">
+            <div class="welcome-section">
+                <h2>مرحباً بك في لوحة تحكم لجنة التحميل</h2>
+                <p>إدارة الجداول الدراسية والتسجيل والتخطيط الأكاديمي لطلاب جامعة الملك سعود - كلية علوم الحاسب والمعلومات</p>
+            </div>
+
+            <!-- الإحصائيات (بدون المقررات المتاحة والتعارضات ونسخ الجدول) -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">👥</span>
+                    <div class="stat-number">247</div>
+                    <div class="stat-label">إجمالي الطلاب</div>
+                    <div class="stat-description">الطلاب المسجلين هذا الفصل</div>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-icon">✅</span>
+                    <div class="stat-number">189</div>
+                    <div class="stat-label">أصوات المقررات الاختيارية</div>
+                    <div class="stat-description">الطلاب الذين قدموا تفضيلاتهم</div>
+                </div>
+
+                <div class="stat-card">
+                    <span class="stat-icon">💬</span>
+                    <div class="stat-number">34</div>
+                    <div class="stat-label">التعليقات</div>
+                    <div class="stat-description">ملاحظات الطلاب حول الجداول</div>
+                </div>
+            </div>
+
+            <!-- قسم التصويت على المواد الاختيارية -->
+            <div class="elective-voting-section">
+                <h3>🗳️ التصويت على المواد الاختيارية</h3>
+
+                <div class="voting-stats">
+                    <div class="voting-stat-card">
+                        <div class="voting-stat-number">189</div>
+                        <div class="voting-stat-label">إجمالي الأصوات</div>
+                    </div>
+                    <div class="voting-stat-card">
+                        <div class="voting-stat-number">76%</div>
+                        <div class="voting-stat-label">نسبة المشاركة</div>
+                    </div>
+                    <div class="voting-stat-card">
+                        <div class="voting-stat-number">5</div>
+                        <div class="voting-stat-label">أيام متبقية</div>
+                    </div>
+                </div>
+
+                <div class="elective-courses">
+                    <div class="course-voting-card">
+                        <div class="course-header">
+                            <span class="course-title">الذكاء الاصطناعي المتقدم</span>
+                            <span class="course-code">CSI 451</span>
+                        </div>
+                        <div class="voting-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>68 صوت</span>
+                                <span>85%</span>
+                            </div>
+                        </div>
+                        <button class="vote-btn" onclick="voteForCourse('CSI 451')">صوت لهذا المقرر</button>
+                    </div>
+
+                    <div class="course-voting-card">
+                        <div class="course-header">
+                            <span class="course-title">أمن المعلومات</span>
+                            <span class="course-code">CSI 453</span>
+                        </div>
+                        <div class="voting-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 72%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>58 صوت</span>
+                                <span>72%</span>
+                            </div>
+                        </div>
+                        <button class="vote-btn" onclick="voteForCourse('CSI 453')">صوت لهذا المقرر</button>
+                    </div>
+
+                    <div class="course-voting-card">
+                        <div class="course-header">
+                            <span class="course-title">تعلم الآلة</span>
+                            <span class="course-code">CSI 455</span>
+                        </div>
+                        <div class="voting-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 63%"></div>
+                            </div>
+                            <div class="progress-text">
+                                <span>50 صوت</span>
+                                <span>63%</span>
+                            </div>
+                        </div>
+                        <button class="vote-btn" onclick="voteForCourse('CSI 455')">صوت لهذا المقرر</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- قسم الإشعارات -->
+            <div class="notifications-section">
+                <h3>🔔 الإشعارات الأخيرة</h3>
+
+                <div class="notification-item">
+                    <div class="notification-header">
+                        <span class="notification-title">تسجيل طالب جديد</span>
+                        <span class="notification-time">منذ دقيقتين</span>
+                    </div>
+                    <div class="notification-content">
+                        قام الطالب sara.mohammed@student.ksu.edu.sa بالتسجيل في المقررات
+                    </div>
+                </div>
+
+                <div class="notification-item">
+                    <div class="notification-header">
+                        <span class="notification-title">تحديث نسخة الجدول</span>
+                        <span class="notification-time">منذ 15 دقيقة</span>
+                    </div>
+                    <div class="notification-content">
+                        تم تعديل النسخة 2 من الجدول - تم تغيير توقيت مقرر الذكاء الاصطناعي
+                    </div>
+                </div>
+
+                <div class="notification-item">
+                    <div class="notification-header">
+                        <span class="notification-title">تعليق طالب جديد</span>
+                        <span class="notification-time">منذ ساعة</span>
+                    </div>
+                    <div class="notification-content">
+                        تم استلام ملاحظة من طالب حول جدول امتحانات يوم الاثنين
+                    </div>
+                </div>
+
+                <div class="notification-item">
+                    <div class="notification-header">
+                        <span class="notification-title">تقديم تفضيلات المقررات الاختيارية</span>
+                        <span class="notification-time">منذ 3 ساعات</span>
+                    </div>
+                    <div class="notification-content">
+                        قام 5 طلاب جدد بتقديم تفضيلاتهم للمقررات الاختيارية
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function toggleMobileMenu() {
+            const navMenu = document.getElementById('nav-menu');
+            navMenu.classList.toggle('active');
+        }
+
+        function logout() {
+            if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
+                localStorage.clear();
+                window.location.href = 'committee-login.html';
+            }
+        }
+
+        function voteForCourse(courseCode) {
+            // هذه الوظيفة ستتعامل مع تسجيل الصوت للمقرر
+            alert(`تم تسجيل صوتك لمقرر ${courseCode} بنجاح! 👍`);
+
+            // هنا يمكن إضافة منطق تسجيل الصوت الفعلي
+            console.log(`Voting for course: ${courseCode}`);
+
+            // تعطيل الزر مؤقتاً بعد التصويت
+            event.target.disabled = true;
+            event.target.textContent = 'تم التصويت ✅';
+        }
+
+        // إضافة تأثيرات التحريك للبطاقات
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-5px)';
+                }, 150);
+            });
+        });
+
+        // إضافة تأثيرات hover للكروت
+        document.querySelectorAll('.course-voting-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.borderColor = '#5a67d8';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.borderColor = '#e9ecef';
+            });
+        });
+
+        // تهيئة الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            // إضافة تأثير التلاشي التدريجي للإحصائيات
+            const statCards = document.querySelectorAll('.stat-card');
+            statCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

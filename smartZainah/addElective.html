@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>تعديل المساق الاختياري مع جدول زمني متعدد - لجنة التحميل</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0; padding: 0; min-height: 100vh;
+    display: flex; justify-content: center; align-items: flex-start;
+    color: #333;
+    padding: 2rem;
+  }
+  .container {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 100%;
+  }
+  h1 {
+    text-align: center;
+  }
+  label {
+    font-weight: 600;
+    text-align: right;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  input[type="text"],
+  input[type="number"],
+  input[type="password"],
+  input[type="time"],
+  input[type="datetime-local"],
+  select,
+  textarea {
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    transition: border-color 0.3s ease;
+    text-align: right; /* Right align for Arabic text input */
+  }
+  input[type="text"]:focus,
+  input[type="number"]:focus,
+  input[type="password"]:focus,
+  input[type="time"]:focus,
+  input[type="datetime-local"]:focus,
+  select:focus,
+  textarea:focus {
+    border-color: #667eea;
+    outline: none;
+  }
+  button,
+  .btn-add-slot,
+  .btn-remove-slot {
+    background-color: #667eea;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 0.5rem;
+  }
+  button:hover,
+  .btn-add-slot:hover,
+  .btn-remove-slot:hover {
+    background-color: #5a67d8;
+  }
+  .message {
+    font-weight: 600;
+    color: red;
+    text-align: center;
+    margin-top: 1rem;
+  }
+  .time-slot {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 10px;
+    position: relative;
+    padding-top: 2rem; /* Give space for remove button */
+  }
+  .btn-remove-slot {
+    position: absolute;
+    top: 8px;
+    right: 8px; /* Changed to right for RTL */
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+    background-color: #dc3545;
+  }
+  .btn-remove-slot:hover {
+    background-color: #c82333;
+  }
+  .form-group {
+    margin-bottom: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>تعديل المساق الاختياري مع جدول زمني متعدد - لجنة التحميل</h1>
+
+  <form id="electiveForm">
+    <div class="form-group">
+      <label for="accessPass">كلمة المرور للجنة:</label>
+      <input type="password" id="accessPass" required />
+    </div>
+
+    <div class="form-group">
+      <label for="levelSelect">اختر المستوى:</label>
+      <select id="levelSelect" required>
+        <option value="" disabled selected>اختر المستوى</option>
+        <option value="3">المستوى 3</option>
+        <option value="4">المستوى 4</option>
+        <option value="5">المستوى 5</option>
+        <option value="6">المستوى 6</option>
+        <option value="7">المستوى 7</option>
+        <option value="8">المستوى 8</option>
+      </select>
+    </div><div class="form-group">
+      <label for="courseSelect">اختر المساق:</label>
+      <select id="courseSelect" required disabled>
+        <option value="" disabled selected>اختر المساق</option>
+      </select>
+    </div>
+    
+    <fieldset id="timeSlotsContainer">
+      <legend style="text-align:right; font-weight:700; margin-bottom:8px;">الفترات الزمنية للمقرر</legend>
+      <div class="time-slot">
+        <label>اليوم</label>
+        <select class="slot-day" required>
+          <option value="" disabled selected>اختر اليوم</option>
+          <option value="Monday">الإثنين</option>
+          <option value="Tuesday">الثلاثاء</option>
+          <option value="Wednesday">الأربعاء</option>
+          <option value="Thursday">الخميس</option>
+          <option value="Friday">الجمعة</option>
+          <option value="Saturday">السبت</option>
+          <option value="Sunday">الأحد</option>
+        </select>
+
+        <label>وقت البداية</label>
+        <input type="time" class="slot-start" required />
+
+        <label>وقت النهاية</label>
+        <input type="time" class="slot-end" required />
+
+        <button class="btn-remove-slot" type="button" title="حذف الفترة الزمنية">x</button>
+      </div>
+    </fieldset>
+
+    <button id="addTimeSlotBtn" type="button" class="btn-add-slot">إضافة فترة زمنية</button>
+
+    <button type="submit">حفظ تعديلات المساق</button>
+  </form>
+
+  <p class="message" id="message"></p>
+</div>
+
+<script>
+  // Configuration for your Baserow API
+  // IMPORTANT: Replace with your actual table IDs and token
+  const BASE_URL_COURSES = "https://api.baserow.io/api/database/rows/table/YOUR_COURSE_TABLE_ID/";
+  const BASE_URL_TIMESLOTS = "https://api.baserow.io/api/database/rows/table/YOUR_TIMESLOT_TABLE_ID/"; // If time slots are in a separate table
+  const TOKEN = "YOUR_DATABASE_TOKEN"; // Your Baserow API token
+
+  const COMMITTEE_PASSWORD = "loadcommittee2025"; // Committee password
+
+  const form = document.getElementById("electiveForm");
+  const messageEl = document.getElementById("message");
+  const timeSlotsContainer = document.getElementById("timeSlotsContainer");
+  const addTimeSlotBtn = document.getElementById("addTimeSlotBtn");
+  const levelSelect = document.getElementById("levelSelect");
+  const courseSelect = document.getElementById("courseSelect");
+  const accessPassInput = document.getElementById("accessPass");
+
+  let selectedCourseId = null; // To store the ID of the currently selected course for updates
+
+  // --- Functions for Time Slot Management ---
+  function createTimeSlotDiv(day = "", start = "", end = "") {
+    const newSlot = document.createElement("div");
+    newSlot.classList.add("time-slot");
+    newSlot.innerHTML = `
+      <label>اليوم</label>
+      <select class="slot-day" required>
+        <option value="" disabled selected>اختر اليوم</option>
+        <option value="Monday" ${day === "Monday" ? "selected" : ""}>الإثنين</option>
+        <option value="Tuesday" ${day === "Tuesday" ? "selected" : ""}>الثلاثاء</option>
+        <option value="Wednesday" ${day === "Wednesday" ? "selected" : ""}>الأربعاء</option>
+        <option value="Thursday" ${day === "Thursday" ? "selected" : ""}>الخميس</option>
+        <option value="Friday" ${day === "Friday" ? "selected" : ""}>الجمعة</option>
+        <option value="Saturday" ${day === "Saturday" ? "selected" : ""}>السبت</option>
+        <option value="Sunday" ${day === "Sunday" ? "selected" : ""}>الأحد</option>
+      </select>
+
+      <label>وقت البداية</label>
+      <input type="time" class="slot-start" value="${start}" required />
+
+      <label>وقت النهاية</label>
+      <input type="time" class="slot-end" value="${end}" required />
+
+      <button class="btn-remove-slot" type="button" title="حذف الفترة الزمنية">x</button>
+    `;
+    return newSlot;
+  }function attachRemoveListener(btn) {
+    btn.addEventListener("click", () => {
+      const slots = timeSlotsContainer.querySelectorAll(".time-slot");
+      if (slots.length > 1) {
+        btn.closest(".time-slot").remove();
+      } else {
+        alert("يجب أن يكون هناك على الأقل فترة زمنية واحدة.");
+      }
+    });
+  }
+
+  function clearTimeSlots() {
+    timeSlotsContainer.innerHTML = '<legend style="text-align:right; font-weight:700; margin-bottom:8px;">الفترات الزمنية للمقرر</legend>';
+    addEmptyTimeSlot(); // Add one empty slot by default
+  }
+
+  function addEmptyTimeSlot() {
+    const newSlot = createTimeSlotDiv();
+    timeSlotsContainer.appendChild(newSlot);
+    attachRemoveListener(newSlot.querySelector(".btn-remove-slot"));
+  }
+
+  // Initial setup: add one empty time slot and attach listener
+  clearTimeSlots(); // Start fresh
+
+  addTimeSlotBtn.addEventListener("click", () => {
+    addEmptyTimeSlot();
+  });
+
+  // --- Event Listeners for Level and Course Selection ---
+
+  levelSelect.addEventListener("change", async () => {
+    messageEl.textContent = "";
+    courseSelect.innerHTML = '<option value="" disabled selected>جاري تحميل المساقات...</option>';
+    courseSelect.disabled = true;
+    selectedCourseId = null; // Reset selected course
+
+    const selectedLevel = levelSelect.value;
+    if (!selectedLevel) {
+      courseSelect.innerHTML = '<option value="" disabled selected>اختر المساق</option>';
+      return;
+    }
+
+    try {
+      // Assuming your Baserow table for courses has a 'level' field
+      // You might need to adjust the filter parameter based on your Baserow setup
+      const response = await fetch(`${BASE_URL_COURSES}?filter__field_LEVEL_NAME__equal=${selectedLevel}`, {
+        method: "GET",
+        headers: {
+          "Authorization": Token ${TOKEN}
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        courseSelect.innerHTML = '<option value="" disabled selected>اختر المساق</option>'; // Clear previous options
+        if (data.results && data.results.length > 0) {
+          data.results.forEach(course => {
+            const option = document.createElement("option");
+            option.value = course.id; // Assuming Baserow provides an 'id' for each row
+            option.textContent = course.course_name; // Assuming 'course_name' field
+            courseSelect.appendChild(option);
+          });
+          courseSelect.disabled = false;
+        } else {
+          messageEl.textContent = "لا توجد مساقات لهذا المستوى.";
+        }
+      } else {
+        const errorData = await response.json();
+        messageEl.textContent = "خطأ في تحميل المساقات: " + (errorData.detail || response.statusText);
+        courseSelect.innerHTML = '<option value="" disabled selected>خطأ في التحميل</option>';
+      }
+    } catch (error) {
+      messageEl.textContent = "حدث خطأ في الاتصال لتحميل المساقات: " + error.message;
+      courseSelect.innerHTML = '<option value="" disabled selected>خطأ في التحميل</option>';
+    }
+  });
+
+  courseSelect.addEventListener("change", async () => {
+    messageEl.textContent = "";
+    selectedCourseId = courseSelect.value;
+    clearTimeSlots(); // Clear existing time slots
+
+    if (!selectedCourseId) {
+      return;
+    }
+
+    try {
+      // Fetch the selected course details, including its time slots
+      // Assuming time_slots are either directly in the course row as a JSON array
+      // or fetched from a linked table
+      const response = await fetch(`${BASE_URL_COURSES}${selectedCourseId}/`, {
+        method: "GET",
+        headers: {
+          "Authorization": Token ${TOKEN}
+        }
+      });if (response.ok) {
+        const courseData = await response.json();
+        if (courseData.time_slots && courseData.time_slots.length > 0) {
+          clearTimeSlots(); // Clear the default empty slot
+          courseData.time_slots.forEach(slot => {
+            const newSlot = createTimeSlotDiv(slot.day, slot.start_time, slot.end_time);
+            timeSlotsContainer.appendChild(newSlot);
+            attachRemoveListener(newSlot.querySelector(".btn-remove-slot"));
+          });
+        } else {
+          messageEl.textContent = "لا توجد فترات زمنية محددة لهذا المساق. يرجى إضافتها.";
+          addEmptyTimeSlot(); // Ensure at least one slot is present
+        }
+      } else {
+        const errorData = await response.json();
+        messageEl.textContent = "خطأ في تحميل تفاصيل المساق: " + (errorData.detail || response.statusText);
+      }
+    } catch (error) {
+      messageEl.textContent = "حدث خطأ في الاتصال لتحميل تفاصيل المساق: " + error.message;
+    }
+  });
+
+
+  // --- Form Submission Handler ---
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    messageEl.style.color = "red";
+    messageEl.textContent = "";
+
+    const accessPass = accessPassInput.value;
+    if (accessPass !== COMMITTEE_PASSWORD) {
+      messageEl.textContent = "كلمة المرور غير صحيحة، غير مسموح بالدخول.";
+      return;
+    }
+
+    if (!selectedCourseId) {
+      messageEl.textContent = "يرجى اختيار مساق لتعديل فتراته الزمنية.";
+      return;
+    }
+
+    const timeSlots = [];
+    const slotDivs = timeSlotsContainer.querySelectorAll(".time-slot");
+    for (const div of slotDivs) {
+      const day = div.querySelector(".slot-day").value;
+      const start = div.querySelector(".slot-start").value;
+      const end = div.querySelector(".slot-end").value;
+      if (!day  !start  !end) {
+        messageEl.textContent = "يرجى ملء جميع تفاصيل الفترات الزمنية.";
+        return;
+      }
+      timeSlots.push({ day, start_time: start, end_time: end });
+    }
+
+    // Prepare data for updating the course
+    // Assuming 'time_slots' is a field in your course table that accepts a JSON array
+    const patchData = {
+      time_slots: timeSlots
+      // You can add other fields here if you intend to update them
+      // e.g., course_name: document.getElementById("courseName").value.trim(),
+    };
+
+    try {
+      const response = await fetch(`${BASE_URL_COURSES}${selectedCourseId}/`, {
+        method: "PATCH", // Use PATCH to update existing data
+        headers: {
+          "Authorization": Token ${TOKEN},
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(patchData)
+      });
+
+      if (response.ok) {
+        messageEl.style.color = "green";
+        messageEl.textContent = تم تحديث الفترات الزمنية للمساق بنجاح!;
+        // Optionally, clear the form or re-fetch data
+        // For now, keep the selected course and updated slots displayed
+      } else {
+        const errorData = await response.json();
+        messageEl.textContent = "خطأ في التحديث: " + (errorData.detail  JSON.stringify(errorData)  response.statusText);
+      }
+    } catch (error) {
+      messageEl.textContent = "حدث خطأ في الاتصال أثناء تحديث المساق: " + error.message;
+    }
+  });
+</script>
+
+   </body>
+      </html>

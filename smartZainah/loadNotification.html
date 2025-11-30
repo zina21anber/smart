@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>إشعارات تعليقات جدول الطلاب - لجنة التحميل</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0; padding: 2rem;
+    color: #333;
+  }
+  .container {
+    background: white;
+    max-width: 800px;
+    margin: auto;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  label {
+    display: block;
+    font-weight: 600;
+    margin-top: 1rem;
+    text-align: right;
+  }
+  input[type="password"] {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+    margin-bottom: 1rem;
+  }
+  button {
+    background-color: #667eea;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #5a67d8;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 0.75rem;
+    text-align: right;
+  }
+  th {
+    background-color: #667eea;
+    color: white;
+  }
+  tr.read {
+    background-color: #f0f0f0;
+    color: #888;
+  }
+  .message {
+    font-weight: 600;
+    color: red;
+    text-align: center;
+    margin-top: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>إشعارات تعليقات جدول الطلاب - لجنة التحميل</h1>
+  
+  <label for="accessPass">كلمة مرور اللجنة</label>
+  <input type="password" id="accessPass" placeholder="أدخل كلمة المرور" />
+  
+  <button id="loadBtn">تحميل التعليقات</button>
+  
+  <p class="message" id="message"></p>
+  
+  <table id="feedbackTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>الرقم الجامعي</th>
+        <th>التعليق</th>
+        <th>تاريخ التعليق</th>
+        <th>تمت القراءة</th>
+        <th>إجراءات</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- التعليقات ستُعرض هنا -->
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const API_BASE_URL = "http://localhost:3000/api";
+  const COMMITTEE_PASSWORD = "loadcommittee2025";
+
+  const accessInput = document.getElementById("accessPass");
+  const loadBtn = document.getElementById("loadBtn");
+  const messageEl = document.getElementById("message");
+  const feedbackTable = document.getElementById("feedbackTable");
+  const tableBody = feedbackTable.querySelector("tbody");
+
+  // تحميل التعليقات من API
+  async function loadFeedback() {
+    messageEl.textContent = "";
+    const pass = accessInput.value;
+    if (pass !== COMMITTEE_PASSWORD) {
+      messageEl.textContent = "كلمة المرور غير صحيحة.";
+      feedbackTable.style.display = "none";
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/notifications`, {
+       headers: {
+       "Content-Type": "application/json"
+       
+        }
+      });
+      if (!response.ok) throw new Error("فشل تحميل التعليقات");
+      const data = await response.json();
+      displayFeedback(data.results);
+      messageEl.textContent = "";
+    } catch (error) {
+      messageEl.textContent = "حدث خطأ في التحميل: " + error.message;
+      feedbackTable.style.display = "none";
+    }
+  }
+
+  // عرض التعليقات في الجدول
+  function displayFeedback(comments) {
+    tableBody.innerHTML = "";
+    if (comments.length === 0) {
+      messageEl.textContent = "لا توجد تعليقات حالياً";
+      feedbackTable.style.display = "none";
+      return;
+    }
+    comments.forEach(comment => {
+      const tr = document.createElement("tr");
+      if (comment.is_read) {
+        tr.classList.add("read");
+      }
+      tr.innerHTML = `
+        <td>${comment.student_id || "-"}</td>
+        <td>${comment.feedback || "-"}</td>
+        <td>${new Date(comment.created_on).toLocaleString()}</td>
+        <td>${comment.is_read ? "نعم" : "لا"}</td>
+        <td>
+          <button data-id="${comment.id}" class="mark-read-btn">${comment.is_read ? "تمت القراءة" : "وضع كمقروء"}</button>
+          <button data-id="${comment.id}" class="delete-btn">حذف</button>
+        </td>
+      `;
+      tableBody.appendChild(tr);
+    });
+    feedbackTable.style.display = "table";
+    attachButtonsEvents();
+  }
+
+  // ربط أزرار "وضع كمقروء" و "حذف"
+  function attachButtonsEvents() {
+    document.querySelectorAll(".mark-read-btn").forEach(btn => {
+      if(!btn.disabled){
+        btn.onclick = markRead;
+      }
+    });
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+      btn.onclick = deleteFeedback;
+    });
+  }
+
+  // وضع التعليق كمقروء (PATCH)
+  async function markRead() {
+    const id = this.dataset.id;
+    try {
+      const response = await fetch(`${API_BASE_URL}/notifications/${id}`, {
+        method: "PATCH",
+        headers: {
+         "Content-Type": "application/json"
+         },
+         body: JSON.stringify({ is_read: true })
+      });
+      if (!response.ok) throw new Error("فشل التحديث");
+      this.textContent = "تمت القراءة";
+      this.disabled = true;
+      // تحديث الصف ليظهر كمقروء
+      this.closest("tr").classList.add("read");
+      this.closest("tr").children[3].textContent = "نعم";
+    } catch (error) {
+      alert("خطأ في تحديث حالة القراءة: " + error.message);
+    }
+  }
+
+  // حذف التعليق (DELETE)
+  async function deleteFeedback() {
+    const id = this.dataset.id;
+    if (!confirm("هل أنت متأكد من حذف هذا التعليق؟")) return;
+    try {
+      const response = await fetch(`${BASE_URL}row/${id}/`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Token ${TOKEN}`
+        }
+      });
+      if (!response.ok) throw new Error("فشل الحذف");
+      // إزالة الصف من الجدول
+      this.closest("tr").remove();
+    } catch (error) {
+      alert("خطأ في حذف التعليق: " + error.message);
+    }
+  }
+
+  loadBtn.addEventListener("click", loadFeedback);
+</script>
+
+</body>
+</html>

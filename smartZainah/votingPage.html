@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSU - Vote for Elective Courses</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 90%;
+            max-width: 1000px;
+            margin: 2rem auto;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .navbar h2 {
+            font-size: 1.5rem;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .content h3 {
+            color: #333;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .content p {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .checkbox-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 2px solid #e1e5e9;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .checkbox-item:hover {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .checkbox-item.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #5a67d8;
+            color: white;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin-bottom: 0;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: block;
+            padding-left: 2rem;
+            position: relative;
+        }
+
+        .checkbox-item label::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 2px;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #667eea;
+            border-radius: 4px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label::before {
+            background: #667eea;
+            border-color: #667eea;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label::after {
+            content: '✓';
+            position: absolute;
+            left: 4px;
+            top: 0px;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .checkbox-item.selected label::before {
+            background: white;
+            border-color: white;
+        }
+
+        .checkbox-item.selected input[type="checkbox"]:checked + label::after {
+            color: #667eea;
+        }
+
+        .course-info {
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        .course-credits {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .checkbox-item.selected .course-credits {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.2rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .selection-counter {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 1rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 2rem 0;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .selection-counter.visible {
+            display: block;
+        }
+
+        .selection-counter.hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                width: calc(100% - 2rem);
+            }
+            
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .checkbox-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .checkbox-item {
+                padding: 1rem;
+            }
+            
+            .content h3 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <h2>Vote for Elective Courses</h2>
+            <a href="dashboard.html" class="back-btn">← Back to Dashboard</a>
+        </div>
+        
+        <div class="content">
+            <h3>Select Your Preferred Elective Courses</h3>
+            <p>Choose multiple courses that interest you. You can select as many as you want, but you'll typically be assigned 2-3 based on availability and your preferences.</p>
+            
+            <div class="selection-counter hidden" id="selection-counter">
+                <span id="selection-count">0</span> courses selected
+            </div>
+            
+            <form id="vote-form">
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="course1" name="electives" value="Artificial Intelligence">
+                        <label for="course1">Artificial Intelligence</label>
+                        <div class="course-info">
+                            Explore machine learning, neural networks, and AI algorithms. Learn to build intelligent systems and understand the future of technology.
+                        </div>
+                        <span class="course-credits">CSC 485 • 3 Credits</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="course2" name="electives" value="Data Science">
+                        <label for="course2">Data Science</label>
+                        <div class="course-info">
+                            Master data analysis, visualization, and statistical modeling. Work with big data and extract meaningful insights from complex datasets.
+                        </div>
+                        <span class="course-credits">CSC 490 • 3 Credits</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="course3" name="electives" value="Cybersecurity">
+                        <label for="course3">Cybersecurity</label>
+                        <div class="course-info">
+                            Learn about network security, encryption, ethical hacking, and how to protect digital systems from cyber threats.
+                        </div>
+                        <span class="course-credits">CSC 475 • 3 Credits</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="course4" name="electives" value="Mobile App Development">
+                        <label for="course4">Mobile App Development</label>
+                        <div class="course-info">
+                            Develop native and cross-platform mobile applications for iOS and Android using modern frameworks and tools.
+                        </div>
+                        <span class="course-credits">CSC 480 • 3 Credits</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="course5" name="electives" value="Web Development">
+                        <label for="course5">Web Development</label>
+                        <div class="course-info">
+                            Build modern web applications using HTML5, CSS3, JavaScript, and popular frameworks like React and Node.js.
+                        </div>
+                        <span class="course-credits">CSC 470 • 3 Credits</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="course6" name="electives" value="Machine Learning">
+                        <label for="course6">Machine Learning</label>
+                        <div class="course-info">
+                            Deep dive into supervised and unsupervised learning algorithms, neural networks, and practical ML applications.
+                        </div>
+                        <span class="course-credits">CSC 495 • 3 Credits</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="course7" name="electives" value="Database Systems">
+                        <label for="course7">Advanced Database Systems</label>
+                        <div class="course-info">
+                            Master advanced database concepts including NoSQL, distributed databases, and database optimization techniques.
+                        </div>
+                        <span class="course-credits">CSC 465 • 3 Credits</span>
+                    </div>
+
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="course8" name="electives" value="Software Engineering">
+                        <label for="course8">Software Engineering</label>
+                        <div class="course-info">
+                            Learn software development methodologies, project management, and best practices for building large-scale applications.
+                        </div>
+                        <span class="course-credits">CSC 460 • 3 Credits</span>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn" id="submit-btn" disabled>Submit My Preferences</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const checkboxes = document.querySelectorAll('input[name="electives"]');
+        const submitBtn = document.getElementById('submit-btn');
+        const selectionCounter = document.getElementById('selection-counter');
+        const selectionCount = document.getElementById('selection-count');
+
+        // Handle checkbox selection
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const item = this.closest('.checkbox-item');
+                
+                if (this.checked) {
+                    item.classList.add('selected');
+                } else {
+                    item.classList.remove('selected');
+                }
+                
+                updateSelectionCounter();
+            });
+        });
+
+        function updateSelectionCounter() {
+            const selectedCount = document.querySelectorAll('input[name="electives"]:checked').length;
+            selectionCount.textContent = selectedCount;
+            
+            if (selectedCount > 0) {
+                selectionCounter.classList.remove('hidden');
+                selectionCounter.classList.add('visible');
+                submitBtn.disabled = false;
+            } else {
+                selectionCounter.classList.remove('visible');
+                selectionCounter.classList.add('hidden');
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('vote-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selectedCourses = [];
+            const checkedBoxes = document.querySelectorAll('input[name="electives"]:checked');
+            
+            checkedBoxes.forEach(checkbox => {
+                selectedCourses.push(checkbox.value);
+            });
+            
+            if (selectedCourses.length === 0) {
+                alert('Please select at least one elective course.');
+                return;
+            }
+            
+            // Store selections in localStorage (in real app, send to server)
+            localStorage.setItem('selectedElectives', JSON.stringify(selectedCourses));
+            
+            // Show success message
+            const confirmationMessage = `Thank you! You have voted for the following courses:\n\n${selectedCourses.map(course => '• ' + course).join('\n')}\n\nYour preferences have been submitted to the Load Committee.`;
+            alert(confirmationMessage);
+            
+            // Redirect back to dashboard
+            window.location.href = 'dashboard.html';
+        });
+
+        // Add hover effects
+        document.querySelectorAll('.checkbox-item').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(-3px) scale(1.02)';
+                }
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected')) {
+                    this.style.transform = 'translateY(0) scale(1)';
+                }
+            });
+        });
+
+        // Load previously selected courses
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedSelections = localStorage.getItem('selectedElectives');
+            if (savedSelections) {
+                const selections = JSON.parse(savedSelections);
+                checkboxes.forEach(checkbox => {
+                    if (selections.includes(checkbox.value)) {
+                        checkbox.checked = true;
+                        checkbox.closest('.checkbox-item').classList.add('selected');
+                    }
+                });
+                updateSelectionCounter();
+            }
+        });
+    </script>
+</body>
+</html>
