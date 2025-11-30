@@ -2,7 +2,7 @@ console.log("✅✅✅ RUNNING THE LATEST SERVER.JS FILE (OpenAI Ready & FINAL R
 console.log("👉 Running THIS server.js from smart3/smart/server");
 
 const express = require('express');
-const cors = require('cors'); // ⬅️ مكتبة CORS موجودة بالفعل
+const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const bodyParser = require('body-parser');
@@ -53,13 +53,13 @@ const PORT = process.env.PORT || 5000;
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
-// ✅✅✅ التعديل المطلوب: تحديث قائمة CORS (السطر 55 تقريباً)
+// ✅✅✅ التعديل المطلوب: تحديث قائمة CORS بالرابط الصحيح 
 app.use(
   cors({
     origin: [
       'http://localhost:3000',
       'https://smart-uf30.onrender.com', // رابط السيرفر على Render
-      'https://papaya-kiepon-41a035.netlify.app' // رابط موقعك الجديد على Netlify
+      'https://lighthearted-speculoos-572bb2.netlify.app' // ✅ الرابط الجديد والحقيقي من المتصفح
     ],
     credentials: true,
   })
@@ -130,7 +130,7 @@ const authenticateToken = (req, res, next) => {
 };
 
 async function runMigrations() {
-  // (كود الهجرة... لم يتغير)
+  // (كود الهجرة... لم يتغير)
   const dir = path.join(__dirname, 'migrations');
   try {
     if (!fs.existsSync(dir)) return;
@@ -206,7 +206,7 @@ app.post('/api/auth/login', validateLogin, async (req, res) => {
 
 // ✅ (جديد) مسار طلب إعادة تعيين كلمة المرور
 app.post('/api/auth/forgot-password', async (req, res) => {
-  // (كود forgot-password... لم يتغير)
+  // (كود forgot-password... لم يتغير)
   const client = await pool.connect();
   try {
     const { email } = req.body;
@@ -222,7 +222,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
     await client.query('UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3', [resetToken, expireDate, email]);
 
     // 👇 رابط الصفحة في Netlify
-    const resetLink = `https://papaya-kiepon-41a035.netlify.app/reset-password?token=${resetToken}`;
+    const resetLink = `https://lighthearted-speculoos-572bb2.netlify.app/reset-password?token=${resetToken}`;
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -245,7 +245,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 // (بقية المسارات... لم تتغير)
 
 app.post('/api/auth/reset-password', async (req, res) => {
-  // (كود reset password لم يتغير)
+  // (كود reset password لم يتغير)
   const client = await pool.connect();
   try {
     const { token, newPassword } = req.body;
@@ -266,7 +266,7 @@ app.post('/api/auth/reset-password', async (req, res) => {
 });
 
 app.post('/api/auth/register-user', validateUserRegistration, async (req, res) => {
-  // (كود register user لم يتغير)
+  // (كود register user لم يتغير)
   const client = await pool.connect();
   try {
     const { email, password, name, role } = req.validatedData;
@@ -283,7 +283,7 @@ app.post('/api/auth/register-user', validateUserRegistration, async (req, res) =
 });
 
 app.post('/api/auth/register-student', validateStudentRegistration, async (req, res) => {
-  // (كود register student لم يتغير)
+  // (كود register student لم يتغير)
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
