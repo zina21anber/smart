@@ -98,7 +98,7 @@ const sslConfig = process.env.DB_SSL === 'true' ? { require: true, rejectUnautho
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
-  database: processs.env.DB_NAME,
+  database: process.env.DB_NAME, // ✅✅✅ تم تصحيح الخطأ الإملائي: processs.env -> process.env
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   ssl: sslConfig,
