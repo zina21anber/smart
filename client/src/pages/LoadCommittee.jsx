@@ -4,6 +4,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FaArrowRight, FaCheckCircle, FaTimesCircle, FaHome, FaCalendarAlt, FaUsers, FaBook, FaBalanceScale, FaBell, FaVoteYea, FaSignOutAlt, FaUserTie } from 'react-icons/fa';
 import '../App.css';
 
+// ✅✅✅ NEW: Define the Render API Base URL
+const API_BASE_URL = 'https://smart-uf30.onrender.com';
+
 // Fetch Helper
 const fetchJson = async (url, method = 'GET', body = null) => {
   const token = localStorage.getItem('token');
@@ -85,9 +88,10 @@ const LoadCommittee = () => {
     setLoading(true);
     setError('');
     try {
+      // 👇 تم التعديل ليستخدم الرابط الجديد
       const [list, courses] = await Promise.all([
-        fetchJson('https://smartschedule1-b64l.onrender.com/api/schedule-versions/pending-committee'),
-        fetchJson('https://smartschedule1-b64l.onrender.com/api/courses')
+        fetchJson(`${API_BASE_URL}/api/schedule-versions/pending-committee`),
+        fetchJson(`${API_BASE_URL}/api/courses`)
       ]);
       setPending(list || []);
       setAllCourses(courses || []);
@@ -95,7 +99,8 @@ const LoadCommittee = () => {
       const entries = await Promise.all(
         (list || []).map(async v => {
           try {
-            const data = await fetchJson(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${v.id}/faculty-comments`);
+            // 👇 تم التعديل ليستخدم الرابط الجديد
+            const data = await fetchJson(`${API_BASE_URL}/api/schedule-versions/${v.id}/faculty-comments`);
             return [v.id, data];
           } catch { return [v.id, []]; }
         })
@@ -178,7 +183,8 @@ const LoadCommittee = () => {
   const handleApprove = async (version) => {
     setSubmittingId(version.id);
     try {
-      await fetchJson(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${version.id}/committee-review`, 'PATCH', {
+      // 👇 تم التعديل ليستخدم الرابط الجديد
+      await fetchJson(`${API_BASE_URL}/api/schedule-versions/${version.id}/committee-review`, 'PATCH', {
         approved: true,
         committee_comment: noteById[version.id] || ''
       });
@@ -194,7 +200,8 @@ const LoadCommittee = () => {
   const handleRequestChanges = async (version) => {
     setSubmittingId(version.id);
     try {
-      await fetchJson(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${version.id}/committee-review`, 'PATCH', {
+      // 👇 تم التعديل ليستخدم الرابط الجديد
+      await fetchJson(`${API_BASE_URL}/api/schedule-versions/${version.id}/committee-review`, 'PATCH', {
         approved: false,
         committee_comment: noteById[version.id] || ''
       });

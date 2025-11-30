@@ -12,11 +12,18 @@ const timeSlots = [
     '12:00 - 13:00', '13:00 - 14:00', '14:00 - 15:00',
 ];
 
+// ✅✅✅ التعديل الذي تم: تم تعريف الرابط الأساسي لـ API و WSS
+const API_BASE_URL = 'https://smart-uf30.onrender.com';
+// ملاحظة: Render يدعم WSS على نفس رابط الـ HTTP
+const COLLAB_WSS_URL = 'wss://smart-uf30.onrender.com/collaboration';
+
 const fetchData = async (url, options = {}) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(url, {
+    // 👇 تم التعديل ليستخدم الرابط الأساسي
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+
+    const response = await fetch(fullUrl, {
         headers: {
-            // ملاحظة: يتم إضافة 'Content-Type': 'application/json' هنا، لكن يجب التأكد من تمرير الـ body كنص JSON
             'Content-Type': 'application/json', 
             ...(token && { Authorization: `Bearer ${token}` }),
         },
@@ -169,7 +176,8 @@ const ManageSchedules = () => {
 
     useEffect(() => {
         const doc = new Y.Doc();
-        const providerUrl = process.env.REACT_APP_COLLAB_ENDPOINT || 'wss://smartschedule1-b64l.onrender.com/collaboration';
+        // 👇 تم التعديل ليستخدم رابط WSS الجديد
+        const providerUrl = COLLAB_WSS_URL;
         const roomName = `manage-schedules-${currentLevel}`;
         const provider = new WebsocketProvider(providerUrl, roomName, doc, { connect: true });
         const awareness = provider.awareness;
@@ -206,7 +214,8 @@ const ManageSchedules = () => {
         setLoading(true);
         setError(null);
         try {
-            const BASE_URL = 'https://smartschedule1-b64l.onrender.com'; 
+            // 👇 تم التعديل ليستخدم API_BASE_URL
+            const BASE_URL = API_BASE_URL; 
             const [allCoursesData, allSectionsData, versionsData] = await Promise.all([
                 fetchData(`${BASE_URL}/api/courses`),
                 fetchData(`${BASE_URL}/api/sections`),
@@ -239,8 +248,8 @@ const ManageSchedules = () => {
         setError(null);
         const currentSchedule = schedules.find(s => s.id === scheduleId);
         try {
-            // 💡 التصحيح هنا: استخدام JSON.stringify() لتحويل الكائن إلى نص JSON صالح
-            const response = await fetchData('https://smartschedule1-b64l.onrender.com/api/schedule/generate', {
+            // 👇 تم التعديل ليستخدم API_BASE_URL
+            const response = await fetchData(`${API_BASE_URL}/api/schedule/generate`, {
                 method: 'POST',
                 body: JSON.stringify({
                     currentLevel,
@@ -267,8 +276,8 @@ const ManageSchedules = () => {
             const versionName = window.prompt('Version Name:', suggestedName);
             if (!versionName) return setIsSaving(null);
             
-            // 💡 التصحيح هنا: استخدام JSON.stringify()
-            await fetchData('https://smartschedule1-b64l.onrender.com/api/schedule-versions', {
+            // 👇 تم التعديل ليستخدم API_BASE_URL
+            await fetchData(`${API_BASE_URL}/api/schedule-versions`, {
                 method: 'POST',
                 body: JSON.stringify({ level: currentLevel, student_count: studentCount, version_comment: versionName, sections: scheduleToSave.sections })
             });
@@ -281,8 +290,8 @@ const ManageSchedules = () => {
         const newName = window.prompt('New Name:', version.version_comment);
         if (!newName) return;
         try {
-            // 💡 التصحيح هنا: استخدام JSON.stringify()
-            await fetchData(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${version.id}`, {
+            // 👇 تم التعديل ليستخدم API_BASE_URL
+            await fetchData(`${API_BASE_URL}/api/schedule-versions/${version.id}`, {
                 method: 'PATCH',
                 body: JSON.stringify({ version_comment: newName })
             });
@@ -294,15 +303,16 @@ const ManageSchedules = () => {
         if (version.is_active) return alert('Cannot delete active version.');
         if (!window.confirm('Delete?')) return;
         try {
-            await fetchData(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${version.id}`, { method: 'DELETE' });
+            // 👇 تم التعديل ليستخدم API_BASE_URL
+            await fetchData(`${API_BASE_URL}/api/schedule-versions/${version.id}`, { method: 'DELETE' });
             fetchAllData();
         } catch (err) { setError(err.message); }
     };
 
     const handleActivateVersion = async (versionId) => {
         try {
-            // لا حاجة لـ JSON.stringify هنا إذا كان الـ body فارغًا أو يتم التعامل معه في الخادم
-            await fetchData(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${versionId}/activate`, { method: 'PATCH' });
+            // 👇 تم التعديل ليستخدم API_BASE_URL
+            await fetchData(`${API_BASE_URL}/api/schedule-versions/${versionId}/activate`, { method: 'PATCH' });
             fetchAllData();
         } catch (err) { setError(err.message); }
     };
@@ -310,8 +320,8 @@ const ManageSchedules = () => {
     const handleSendToCommittee = async (version) => {
         setSendingId(version.id);
         try {
-            // 💡 التصحيح هنا: استخدام JSON.stringify()
-            await fetchData(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${version.id}/scheduler-approve`, {
+            // 👇 تم التعديل ليستخدم API_BASE_URL
+            await fetchData(`${API_BASE_URL}/api/schedule-versions/${version.id}/scheduler-approve`, {
                 method: 'PATCH',
                 body: JSON.stringify({ approved: true })
             });

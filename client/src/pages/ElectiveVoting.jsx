@@ -4,6 +4,9 @@ import { Container, Row, Col, Card, Navbar, Nav, Button, Spinner, Alert, Badge, 
 import { FaBook, FaCalendarAlt, FaVoteYea, FaHome, FaSignOutAlt, FaCheckCircle } from 'react-icons/fa';
 import '../App.css';
 
+// ✅✅✅ NEW: Define the Render API Base URL
+const API_BASE_URL = 'https://smart-uf30.onrender.com'; // <--- الرابط الصحيح
+
 // Generic fetchData function
 const fetchData = async (url, method = 'GET', body = null) => {
     const token = localStorage.getItem('token');
@@ -12,7 +15,8 @@ const fetchData = async (url, method = 'GET', body = null) => {
         headers: { 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) }
     };
     if (body) { options.body = JSON.stringify(body); }
-    const response = await fetch(url, options);
+    // ✅✅✅ FIX: Prepend the API_BASE_URL to the request URL
+    const response = await fetch(`${API_BASE_URL}${url}`, options);
     if (response.status === 401 || response.status === 403) {
         localStorage.clear();
         throw new Error("Authentication failed.");
@@ -46,15 +50,15 @@ function ElectiveVoting() {
             setStudentId(user.id);
             setUserInfo({ name: user.name || 'Student', email: user.email || '' });
 
-            // 👇 تم تحديث الرابط هنا
-            const existingVotes = await fetchData(`https://smartschedule1-b64l.onrender.com/api/votes/student/${user.id}`);
+            // تم التعديل ليستخدم المسار النسبي (API_BASE_URL)
+            const existingVotes = await fetchData(`/api/votes/student/${user.id}`);
             if (existingVotes.length > 0) {
                 setSubmitted(true);
                 return;
             }
 
-            // 👇 تم تحديث الرابط هنا
-            const electivesData = await fetchData("https://smartschedule1-b64l.onrender.com/api/courses/elective");
+            // تم التعديل ليستخدم المسار النسبي (API_BASE_URL)
+            const electivesData = await fetchData("/api/courses/elective");
             setElectives(electivesData);
             // Initialize selections state
             const initialSelections = {};
@@ -104,8 +108,8 @@ function ElectiveVoting() {
 
         try {
             for (const vote of selected) {
-                // 👇 تم تحديث الرابط هنا
-                await fetchData("https://smartschedule1-b64l.onrender.com/api/vote", "POST", {
+                // تم التعديل ليستخدم المسار النسبي (API_BASE_URL)
+                await fetchData("/api/vote", "POST", {
                     student_id: studentId,
                     course_id: vote.course_id,
                     vote_value: vote.priority

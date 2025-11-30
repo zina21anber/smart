@@ -28,8 +28,8 @@ ChartJS.register(
   Legend,
 );
 
-// ✅✅✅ FIX: Define the Render API Base URL
-const API_BASE_URL = 'https://smartschedule1-b64l.onrender.com';
+// ✅✅✅ التعديل المطلوب: تم تغيير الرابط القديم إلى رابط Render الجديد
+const API_BASE_URL = 'https://smart-uf30.onrender.com';
 
 // Generic fetchData function
 const fetchData = async (url, method = 'GET', body = null) => {

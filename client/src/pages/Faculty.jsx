@@ -23,6 +23,9 @@ const fetchJson = async (url, method = 'GET', body = null) => {
   return data;
 };
 
+// ✅✅✅ NEW: Define the Render API Base URL
+const API_BASE_URL = 'https://smart-uf30.onrender.com';
+
 const Faculty = () => {
   const [levels] = useState([3,4,5,6,7,8]);
   const [selectedLevel, setSelectedLevel] = useState(3);
@@ -39,10 +42,10 @@ const Faculty = () => {
     setLoading(true);
     setError('');
     try {
-      // 👇 تم تحديث الروابط هنا
+      // 👇 تم التعديل ليستخدم الرابط الجديد
       const [vers, crs] = await Promise.all([
-        fetchJson(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/approved?level=${selectedLevel}`),
-        fetchJson('https://smartschedule1-b64l.onrender.com/api/courses')
+        fetchJson(`${API_BASE_URL}/api/schedule-versions/approved?level=${selectedLevel}`),
+        fetchJson(`${API_BASE_URL}/api/courses`)
       ]);
       const approved = vers || [];
       setVersions(approved);
@@ -51,8 +54,8 @@ const Faculty = () => {
       const entries = await Promise.all(
         approved.map(async v => {
           try {
-            // 👇 تم تحديث الرابط هنا
-            const mine = await fetchJson(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${v.id}/my-faculty-comments`);
+            // 👇 تم التعديل ليستخدم الرابط الجديد
+            const mine = await fetchJson(`${API_BASE_URL}/api/schedule-versions/${v.id}/my-faculty-comments`);
             return [v.id, mine || []];
           } catch { return [v.id, []]; }
         })
@@ -134,12 +137,12 @@ const Faculty = () => {
     if (!text) return alert('Please write a comment first.');
     setSendingId(version.id);
     try {
-      // 👇 تم تحديث الرابط هنا
-      await fetchJson(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${version.id}/faculty-comments`, 'POST', { comment: text });
+      // 👇 تم التعديل ليستخدم الرابط الجديد
+      await fetchJson(`${API_BASE_URL}/api/schedule-versions/${version.id}/faculty-comments`, 'POST', { comment: text });
       setNoteById(prev => ({ ...prev, [version.id]: '' }));
       // refresh my comments only
-      // 👇 تم تحديث الرابط هنا
-      const mine = await fetchJson(`https://smartschedule1-b64l.onrender.com/api/schedule-versions/${version.id}/my-faculty-comments`);
+      // 👇 تم التعديل ليستخدم الرابط الجديد
+      const mine = await fetchJson(`${API_BASE_URL}/api/schedule-versions/${version.id}/my-faculty-comments`);
       setMyCommentsById(prev => ({ ...prev, [version.id]: mine || [] }));
     } catch (e) {
       alert(e.message || 'Failed to send comment.');

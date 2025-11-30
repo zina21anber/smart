@@ -4,10 +4,14 @@ import { Container, Card, Button, Spinner, Alert, ListGroup, Form, Badge, Navbar
 import { FaBell, FaArrowLeft, FaHome, FaCalendarAlt, FaUsers, FaBook, FaBalanceScale, FaCheckCircle, FaVoteYea, FaSignOutAlt, FaUserGraduate } from 'react-icons/fa';
 import '../App.css';
 
+// ✅✅✅ NEW: Define the Render API Base URL
+const API_BASE_URL = 'https://smart-uf30.onrender.com';
+
 // Generic fetchData function
 const fetchData = async (url) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(url, {
+    // 👇 التعديل هنا: تم دمج الرابط الأساسي مع المسار النسبي
+    const response = await fetch(`${API_BASE_URL}${url}`, {
         headers: { 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) }
     });
     if (response.status === 401 || response.status === 403) {
@@ -49,7 +53,7 @@ const ManageNotifications = () => {
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="navbar-nav" />
                 <Navbar.Collapse id="navbar-nav">
-                  <Nav className="mx-auto">
+                  <Nav className="me-auto my-2 my-lg-0 nav-menu">
                     {(type === 'student' || role === 'student') ? (
                         <>
                             <Nav.Link onClick={() => navigate('/student-dashboard')} className={`text-white mx-2 ${isActive('/student-dashboard')}`}><FaHome className="me-1"/> Dashboard</Nav.Link>
@@ -69,9 +73,9 @@ const ManageNotifications = () => {
                   <div className="d-flex align-items-center mt-3 mt-lg-0">
                      <div className="text-white text-end me-3 lh-1 d-none d-lg-block">
                         <div className="fw-bold">{user.name || 'User'}</div>
-                        <small className="text-white-50 text-uppercase">{user.role || 'Guest'}</small>
+                        <div style={{ opacity: 0.8, fontSize: '0.8rem' }}>{user.role || 'Guest'}</div>
                      </div>
-                     <Button variant="danger" size="sm" className="fw-bold px-3 rounded-pill" onClick={handleLogout}><FaSignOutAlt className="me-1"/> Logout</Button>
+                     <Button variant="danger" className="fw-bold" onClick={handleLogout}><FaSignOutAlt className="me-1"/> Logout</Button>
                   </div>
                 </Navbar.Collapse>
               </Container>
@@ -83,8 +87,8 @@ const ManageNotifications = () => {
         setLoading(true);
         setError(null);
         try {
-            // 👇 الرابط صحيح (Render)
-            const data = await fetchData('https://smartschedule1-b64l.onrender.com/api/comments/all');
+            // 👇 تم التعديل ليستخدم المسار النسبي (API_BASE_URL)
+            const data = await fetchData('/api/comments/all');
             setAllComments(data);
         } catch (err) {
             if (err.message.includes("Authentication failed")) {

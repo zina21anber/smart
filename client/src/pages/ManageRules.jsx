@@ -6,10 +6,17 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import '../App.css';
 
+// ✅✅✅ التعديل الذي تم: تم تعريف الرابط الأساسي لـ API و Yjs
+const API_BASE_URL = 'https://smart-uf30.onrender.com';
+const COLLAB_WSS_URL = 'wss://smart-uf30.onrender.com/collaboration';
+
 // Utility function to handle API requests
 const fetchData = async (url, method = 'GET', body = null) => {
     const token = localStorage.getItem('token');
-    const response = await fetch(url, {
+    // 👇 تم التعديل ليستخدم الرابط الأساسي
+    const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+    
+    const response = await fetch(fullUrl, {
         method,
         headers: {
             'Content-Type': 'application/json',
@@ -113,7 +120,8 @@ const ManageRules = () => {
         setLoading(true);
         setPageError(null);
         try {
-            const rulesData = await fetchData('https://smartschedule1-b64l.onrender.com/api/rules');
+            // 👇 تم التعديل ليستخدم الرابط النسبي
+            const rulesData = await fetchData('/api/rules');
             setRules(rulesData);
         } catch (err) {
             console.error("Error fetching rules:", err);
@@ -141,8 +149,9 @@ const ManageRules = () => {
     }, []);
 
     useEffect(() => {
+        // 👇 تم التعديل ليستخدم الرابط الجديد
+        const providerUrl = COLLAB_WSS_URL;
         const doc = new Y.Doc();
-        const providerUrl = process.env.REACT_APP_COLLAB_ENDPOINT || 'wss://smartschedule1-b64l.onrender.com/collaboration';
         const provider = new WebsocketProvider(providerUrl, 'manage-rules', doc, { connect: true });
         const draft = doc.getText('ruleDraft');
         const queue = doc.getArray('ruleQueue');
@@ -247,7 +256,8 @@ const ManageRules = () => {
         setPageError(null);
         setMessage(null);
         try {
-            await fetchData('https://smartschedule1-b64l.onrender.com/api/rules', 'POST', { text: newRuleText });
+            // 👇 تم التعديل ليستخدم الرابط النسبي
+            await fetchData('/api/rules', 'POST', { text: newRuleText });
             setMessage(`Rule added successfully: ${newRuleText}`);
             setNewRuleText('');
             fetchRules();
@@ -264,7 +274,8 @@ const ManageRules = () => {
         setPageError(null);
         setMessage(null);
         try {
-            await fetchData(`https://smartschedule1-b64l.onrender.com/api/rules/${ruleId}`, 'DELETE');
+            // 👇 تم التعديل ليستخدم الرابط النسبي
+            await fetchData(`/api/rules/${ruleId}`, 'DELETE');
             setMessage("Rule deleted successfully.");
             fetchRules();
         } catch (err) {

@@ -4,6 +4,9 @@ import { Container, Row, Col, Card, Navbar, Nav, Button, Spinner, Alert, ListGro
 import { FaUserGraduate, FaBook, FaCalendarAlt, FaVoteYea, FaHome, FaSignOutAlt, FaChartLine, FaSave, FaComment, FaArrowCircleRight, FaPaperPlane } from 'react-icons/fa';
 import '../App.css';
 
+// ✅✅✅ NEW: Define the Render API Base URL
+const API_BASE_URL = 'https://smart-uf30.onrender.com';
+
 // Generic fetchData function
 const fetchData = async (url, method = 'GET', body = null) => {
     const token = localStorage.getItem('token');
@@ -12,7 +15,8 @@ const fetchData = async (url, method = 'GET', body = null) => {
         headers: { 'Content-Type': 'application/json', ...(token && { 'Authorization': `Bearer ${token}` }) }
     };
     if (body) { options.body = JSON.stringify(body); }
-    const response = await fetch(url, options);
+    // 👇 تم التعديل هنا لدمج الرابط الأساسي مع المسار النسبي
+    const response = await fetch(`${API_BASE_URL}${url}`, options);
     if (response.status === 401 || response.status === 403) {
         localStorage.clear();
         throw new Error("Authentication failed. Please log in again.");
@@ -43,11 +47,11 @@ const ScheduleViewer = ({ level, token, studentId }) => {
         setLoading(true);
         setError(null);
         try {
-            // 👇 تم تعديل الرابط هنا
-            const coursesData = await fetchData('https://smartschedule1-b64l.onrender.com/api/courses');
+            // 👇 تم التعديل ليستخدم المسار النسبي (API_BASE_URL)
+            const coursesData = await fetchData('/api/courses');
             setAllCourses(coursesData || []);
-            // 👇 تم تعديل الرابط هنا
-            const scheduleData = await fetchData(`https://smartschedule1-b64l.onrender.com/api/schedules/level/${level}`);
+            // 👇 تم التعديل ليستخدم المسار النسبي (API_BASE_URL)
+            const scheduleData = await fetchData(`/api/schedules/level/${level}`);
             setSchedule(scheduleData.schedule);
         } catch (err) {
             setError(err.message);
@@ -78,8 +82,8 @@ const ScheduleViewer = ({ level, token, studentId }) => {
 
         setIsSubmitting(true);
         try {
-            // 👇 تم تعديل الرابط هنا
-            await fetchData('https://smartschedule1-b64l.onrender.com/api/comments', 'POST', payload);
+            // 👇 تم التعديل ليستخدم المسار النسبي (API_BASE_URL)
+            await fetchData('/api/comments', 'POST', payload);
             setNewComment("");
             setSubmitSuccess("Comment submitted successfully!");
         } catch (err) {
