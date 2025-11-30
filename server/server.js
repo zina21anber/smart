@@ -1,4 +1,4 @@
-﻿console.log("✅✅✅ RUNNING THE LATEST SERVER.JS FILE (OpenAI Ready & FINAL RESPONSE FORMAT FIX) ✅✅✅");
+console.log("✅✅✅ RUNNING THE LATEST SERVER.JS FILE (OpenAI Ready & FINAL RESPONSE FORMAT FIX) ✅✅✅");
 console.log("👉 Running THIS server.js from smart3/smart/server");
 
 const express = require('express');
@@ -58,9 +58,8 @@ app.use(
   cors({
     origin: [
       'http://localhost:3000',
-      'http://localhost:3001',
-      'https://smartschedule1-b64l.onrender.com',
-      'https://endearing-kulfi-c96605.netlify.app' // ✅ رابط موقعك
+      'https://smart-uf30.onrender.com', // رابط السيرفر على Render
+      'https://papaya-kiepon-41a035.netlify.app' // ✅ التعديل هنا: رابط موقعك الجديد على Netlify
     ],
     credentials: true,
   })
@@ -99,7 +98,7 @@ const sslConfig = process.env.DB_SSL === 'true' ? { require: true, rejectUnautho
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
-  database: process.env.DB_NAME,
+  database: processs.env.DB_NAME,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   ssl: sslConfig,
@@ -129,7 +128,7 @@ const authenticateToken = (req, res, next) => {
       return res.status(403).json({ error: 'Invalid or expired token' });
     }
     req.user = user;
-    next();
+    next(0);
   });
 };
 
@@ -220,8 +219,8 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
     await client.query('UPDATE users SET reset_token = $1, reset_token_expires = $2 WHERE email = $3', [resetToken, expireDate, email]);
 
-    // رابط الصفحة في Netlify
-    const resetLink = `https://endearing-kulfi-c96605.netlify.app/reset-password?token=${resetToken}`;
+    // 👇 التعديل هنا: رابط الصفحة في Netlify
+    const resetLink = `https://papaya-kiepon-41a035.netlify.app/reset-password?token=${resetToken}`;
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -967,7 +966,7 @@ app.post('/api/schedule/generate', authenticateToken, async (req, res) => {
 
   } catch (error) {
     console.error('AI Schedule Generation error:', error);
-    res.status(500).json({ error: error.message || 'Failed to process AI request.' });
+    res.status(500).json({ error: 'Failed to process AI request.' });
   } finally {
     client.release();
   }
@@ -1339,4 +1338,3 @@ const gracefulShutdown = () => {
 
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
-
